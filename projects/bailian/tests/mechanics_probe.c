@@ -78,7 +78,7 @@ int audit_cases(char *out,size_t capacity)
     memset(a->state.deck,0,sizeof(a->state.deck));a->state.deck[RESULT_HOLD]=1000;
     forge_pointer(a,250,250);game_update_elapsed(a,60);
     assert(a->state.items[ITEM_CLOCK]==0);
-    forge_pointer(a,350,355); /* Failed rewind still cancels cooldown. */
+    forge_pointer(a,350,355); /* Failed rewind must not bypass the remaining cooldown. */
     forge_pointer(a,250,250);game_update_elapsed(a,60);
     unsigned failed_rewind_hits=a->state.hits;
     assert(failed_rewind_hits==1);game_delete(a);

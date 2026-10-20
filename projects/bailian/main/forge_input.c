@@ -127,6 +127,7 @@ void forge_pointer(game_handle_t g,int x,int y)
         return;
         }
     if(y>=414){unsigned tab=(unsigned)x/120;
+        if(tab==g->screen)return;
         forge_swing_cancel(g,tab!=g->screen);
         g->screen=(uint8_t)tab;
         g->page=0;
@@ -142,7 +143,7 @@ void forge_pointer(game_handle_t g,int x,int y)
     if(g->screen==SCREEN_FORGE){
         if(y>=337&&y<378){if(x<224){forge_swing_cancel(g,true);if(s->active>=0)forge_move(g,s->active,true);
                 else g->screen=SCREEN_RACK;
-                }else if(x>256){forge_swing_cancel(g,true);forge_rewind(g);}
+                }else if(x>256)forge_rewind(g);
             return;
             }
         if(y>=95&&y<330){forge_blade_t *b=forge_active(g);

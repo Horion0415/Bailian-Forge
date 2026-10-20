@@ -481,7 +481,7 @@ bool forge_use_item(game_handle_t g,int item){
     return true;
 }
 bool forge_rewind(game_handle_t g){
-    if(!g->undo_valid||!g->state.items[ITEM_CLOCK]){forge_notice(g,"需要悔恨发条，且尚未离开上一锤的铁砧");
+    if(g->state.phase!=PHASE_PLAY||g->tribute.active||!g->undo_valid||!g->state.items[ITEM_CLOCK]){forge_notice(g,"需要悔恨发条，且尚未离开上一锤的铁砧");
         return false;
         }
     uint16_t left=g->state.items[ITEM_CLOCK]-1;
@@ -491,10 +491,9 @@ bool forge_rewind(game_handle_t g){
     g->state.rng=rng;
     g->state.revision=rev;
     g->undo_valid=false;
-    g->pending_strike=false;
-    g->cooldown_ms=0;
-    g->animation_ms=0;
+    forge_swing_reset(g);
     g->last_result=RESULT_NONE;
+    forge_particles(g,RESULT_NONE);
     forge_notice(g,"回溯上一锤，消耗1份悔恨发条");
     g->feedback=FB_SELECT;
     return true;

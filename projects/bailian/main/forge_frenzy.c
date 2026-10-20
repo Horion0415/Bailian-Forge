@@ -35,6 +35,18 @@ void forge_frenzy_update(game_handle_t g,uint32_t ms)
     else if(inside){unsigned age=f->age_ms+ms;f->age_ms=(uint16_t)(age>12000?12000:age);}
     else f->active=false;
 }
+void forge_frenzy_restore(game_handle_t g)
+{
+    forge_frenzy_t *f=&g->fx.frenzy;const forge_blade_t *b=forge_active(g);
+    g->fx.frenzy_pulse_ms=0;
+    if(!b||b->frenzy_ms<=0){*f=(forge_frenzy_t){0};return;}
+    unsigned remaining=(unsigned)b->frenzy_ms;
+    unsigned total=f->blade_id==b->id&&f->total_ms>=remaining?f->total_ms:remaining;
+    unsigned age=total-remaining;
+    /* Restore the aura and bar, without replaying the entry burst or title. */
+    if(age<ENTRY_MS)age=ENTRY_MS;
+    *f=(forge_frenzy_t){.blade_id=b->id,.age_ms=(uint16_t)age,.total_ms=(uint16_t)total,.active=true};
+}
 static float strength(game_handle_t g)
 {
     const forge_blade_t *b=forge_active(g);

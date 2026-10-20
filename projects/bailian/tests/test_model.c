@@ -6,6 +6,8 @@
 #include <string.h>
 /* Model tests intentionally do not link a renderer or the device BSP. */
 void forge_particles(game_handle_t g,int kind){(void)g;(void)kind;}
+void forge_heat_start(game_handle_t g){(void)g;}
+bool forge_fx_break_visible(game_handle_t g){(void)g;return false;}
 static game_handle_t fresh(void)
 {
     game_handle_t g=calloc(1,sizeof(*g));assert(g);g->undo=calloc(1,sizeof(*g->undo));assert(g->undo);

@@ -39,6 +39,14 @@ void forge_fx_reset(game_handle_t g)
 void forge_particles(game_handle_t g,int kind)
 {
     forge_fx_t *fx=&g->fx;
+    /* RESULT_NONE retracts an undone hit without generating a new impact. */
+    if(kind==RESULT_NONE){
+        fx->active=false;fx->result=RESULT_NONE;fx->age_ms=fx->duration_ms=0;fx->shake=0;
+        memset(fx->particles,0,sizeof(fx->particles));
+        forge_heat_reset(g);forge_sword_reset(g);forge_sword_update(g,0);
+        forge_frenzy_restore(g);
+        return;
+    }
     const forge_blade_t *old=NULL,*blade=forge_active(g);
     if(g->undo_valid&&g->undo->active>=0)old=&g->undo->blades[g->undo->active];
     fx->active=true;fx->result=(uint8_t)kind;fx->age_ms=0;

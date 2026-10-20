@@ -9,6 +9,7 @@ typedef struct {
 } forge_frenzy_t;
 void forge_frenzy_strike(game_handle_t g,bool inside,bool entering);
 void forge_frenzy_update(game_handle_t g,uint32_t ms);
+void forge_frenzy_restore(game_handle_t g);
 void forge_frenzy_back(game_handle_t g,int dx,int dy);
 void forge_frenzy_front(game_handle_t g,int dx,int dy);
 void forge_frenzy_label(game_handle_t g);
