@@ -13,4 +13,11 @@ mosaico_game_sdk_configure_gsp_compiler()
 mosaico_game_sdk_add_components(RAYLIB AUDIO)
 include("${MOSAICO_UTILS_ROOT}/esp-mosaico-recovery/cmake/mosaico_idf_project.cmake")
 project(bailian VERSION 0.2.1)
+# The pinned S31 GCC 16.1 crashes in SLP across both game and SDK sources
+# (lwIP and DMA included). Keep other -O2 passes and other toolchains intact.
+if(IDF_TARGET STREQUAL "esp32s31" AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
+   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "16.1" AND
+   CMAKE_C_COMPILER_VERSION VERSION_LESS "16.2")
+    idf_build_set_property(COMPILE_OPTIONS "-fno-tree-slp-vectorize" APPEND)
+endif()
 include("${MOSAICO_UTILS_ROOT}/mosaico-tools/cmake/system_update.cmake")

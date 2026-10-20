@@ -5,15 +5,6 @@ idf_component_register(
     REQUIRES mosaico_game_app mosaico_raylib_fast mosaico_game_2d mosaico_game_assets
              mosaico_game_audio esp-gsp nvs_flash esp_timer esp_hw_support)
 
-# The pinned GCC 16.1 toolchain ICEs in its SLP pass for these animation-state
-# stores with the v2 game layout. Keep their scalar compilation at -O2.
-if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
-   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL "16.1" AND
-   CMAKE_C_COMPILER_VERSION VERSION_LESS "16.2")
-    set_source_files_properties(forge_tribute.c forge_sword.c game.c forge_model.c
-        PROPERTIES COMPILE_OPTIONS "-fno-tree-slp-vectorize")
-endif()
-
 set(FORGE_ASSETS "${CMAKE_CURRENT_LIST_DIR}/../assets/generated")
 file(GLOB FORGE_ASSET_INPUTS CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_LIST_DIR}/../assets_src/*" "${CMAKE_CURRENT_LIST_DIR}/*.c"
