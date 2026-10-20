@@ -33,6 +33,6 @@
     "attachments": []
   },
   "release": {
-    "changelog": "0.3.0: Chinese/English switching, independent device language preference, English relic/item/rule text, adaptive native text layout and localized currency units."
+    "changelog": "0.3.1: correct clockwork rewind cleanup, prevent buffered automatic strikes, preserve active swings on failed rewinds and keep undo when reselecting the current tab."
   }
 }

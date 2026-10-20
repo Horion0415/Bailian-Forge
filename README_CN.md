@@ -69,6 +69,7 @@ python3 projects/bailian/tests/run_model_tests.py
 python3 projects/bailian/tests/replay_gameplay.py
 python3 projects/bailian/tests/replay_audio.py
 python3 projects/bailian/tests/replay_i18n.py
+python3 projects/bailian/tests/replay_rewind.py
 ```
 
 测试直接执行共享原生 C 模型与渲染器。构建目录、测试输出、凭据和设备诊断记录不进入 Git。

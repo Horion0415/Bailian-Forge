@@ -22,5 +22,5 @@ ImageGen 生成，音效由程序合成。
 [源码与运行说明](https://github.com/Horion0415/Bailian-Forge)
 · [素材与规则来源](https://github.com/Horion0415/Bailian-Forge/blob/main/projects/bailian/ASSETS.md)
 
-版本 0.3.0 增加完整中英文切换、独立语言偏好与英文排版。0.2.1 实机通过 app-update 验证，平台下载首次安装
+版本 0.3.1 修复发条回溯的连击队列、残留特效及回溯时机，保留 0.3.0 的完整中英文切换、独立语言偏好与英文排版。0.2.1 实机通过 app-update 验证，平台下载首次安装
 尚待验证；此前 Vibe Mode 0.1.4 的一次 System Update 传输中重启，原因尚未确认。

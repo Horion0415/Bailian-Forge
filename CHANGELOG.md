@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1
+
+- Clear buffered swings, stale impact/shatter effects and sword transitions after rewind.
+- Preserve an active swing when rewind fails and retain undo on the current Forge tab.
+- Add native rewind regressions; keep snapshot, RNG, item cost and save-format rules unchanged.
+
 ## 0.3.0
 
 - Add immediate Chinese/English switching in the top bar and pause menu.

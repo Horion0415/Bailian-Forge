@@ -38,6 +38,8 @@ while preserving the retained Vibe Mode prefix.
 For ESP32-S31 with GCC 16.1, SLP is disabled because it crashes across game,
 network and DMA sources in fresh builds. Other -O2 passes are retained; the
 workaround does not apply to other compiler versions or targets.
+When reusing an existing build sdkconfig, align CONFIG_APP_PROJECT_VER with the
+source release; updating defaults alone does not replace a cached version.
 
 Rule JSON and generated C tables are included. The optional reference importer
 accepts an explicitly supplied independently implemented bailian.cjs; normal
@@ -70,3 +72,20 @@ The same renderer measures and wraps CJK characters and English words at native 
 Run tests/replay_i18n.py after editing text; it checks translation coverage, all relic/item
 details, native text bounds, language controls and save/RNG isolation. Snapshot currency
 fields keep their existing machine-facing format; only display amounts are localized.
+
+## Regret Clockwork
+
+A clock restores the complete snapshot immediately before the last contact,
+including a shatter's rewards, inheritance, armed item effects, frenzy and energy.
+It consumes exactly one clock and keeps the current RNG sequence. Undo is single-use;
+a new contact creates a new opportunity. Rewinding clears pending/buffered swings,
+impact particles and the previous sword transition, without replaying frenzy entry.
+
+Changing blades, offering/trading, shopping/rerolling, using another item, evolving,
+switching to Rack/Relics/Tribute or loading a save invalidates the opportunity. Opening the item
+bag to use the clock is allowed. Re-selecting the current Forge tab, pausing, and
+changing language/audio preferences preserve it. A failed rewind leaves a swing
+in progress intact. Gameplay save size remains unchanged.
+
+`tests/replay_rewind.py` covers all five results, +99, shatter side effects,
+clone/backlog rollback, item-bag input, invalidation and controller/visual cleanup.

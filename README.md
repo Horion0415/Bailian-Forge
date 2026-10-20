@@ -76,6 +76,7 @@ python3 projects/bailian/tests/run_model_tests.py
 python3 projects/bailian/tests/replay_gameplay.py
 python3 projects/bailian/tests/replay_audio.py
 python3 projects/bailian/tests/replay_i18n.py
+python3 projects/bailian/tests/replay_rewind.py
 ```
 
 Tests execute the shared native C model and renderer. Build/test output,
