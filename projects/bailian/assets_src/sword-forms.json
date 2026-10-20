@@ -1,0 +1,26 @@
+{
+  "tool": "built-in image_gen.imagegen",
+  "reference": "swords.png",
+  "transparent_background": true,
+  "grid": "2 columns x 5 rows, same family ordering as original",
+  "levels": [
+    0,
+    3,
+    6,
+    10,
+    20
+  ],
+  "prompt_common": "Production sprite sheet for the 480x480 Bailian dark fantasy forging game. Edit referenced sheet into upgraded variants, with actual blade silhouette, guard construction, pommel and engraving changes. Exactly 10 isolated horizontal swords in equal 2-column x 5-row grid, transparent background, same ten families and positions as reference. Realistic painted/3D metal texture, warm amber rim lighting, handles left and tips right, guard around 28 percent of cell width, tip 94 percent, blade horizontal. Preserve family materials and motifs. No words, numbers, labels, UI, hands, grid lines, extra objects or rectangular backdrops.",
+  "prompt_stages": {
+    "3": "Reforged: broader blade profile, new angular shoulder, reshaped sharp tip, repaired steel and bevels, small second guard prong.",
+    "6": "Tempered: thicker shoulders, wider blade with a deep fuller, compound guard with two secondary prongs, reinforced pommel and fittings.",
+    "10": "Masterwork: stepped/flared blade shoulders, compound guard with ornamental wings, sculpted pommel, elaborate surface engravings.",
+    "20": "Mythic: layered shoulders, crowned/swept multi-pronged guard and advanced family-specific geometry; holy sunburst, dragon volcanic teeth, rune inlaid metal, bifurcated split tips, world-tree branches and leaves, larger fishbone vertebrae, ceremonial skull architecture."
+  },
+  "files": {
+    "3": "swords-plus3.png",
+    "6": "swords-plus6.png",
+    "10": "swords-plus10.png",
+    "20": "swords-plus20.png"
+  }
+}
