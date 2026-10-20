@@ -15,12 +15,14 @@
 
 ![英文界面原生回放示例](publish/english.png)
 
-剑体动画及英文界面图片来自原生测试场景。支持顶部 EN / ZH 和暂停菜单即时切换语言，适用于
+![进贡巨龙原生回放示例](publish/tribute-dragon.png)
+
+剑体动画、英文界面及进贡巨龙图片来自原生测试场景。支持顶部 EN / ZH 和暂停菜单即时切换语言，适用于
 ESP-Mosaico / ESP32-S31。玩法受 ForgeTax 启发，规则独立实现，图像通过
 ImageGen 生成，音效由程序合成。
 
 [源码与运行说明](https://github.com/Horion0415/Bailian-Forge)
 · [素材与规则来源](https://github.com/Horion0415/Bailian-Forge/blob/main/projects/bailian/ASSETS.md)
 
-版本 0.3.1 修复发条回溯的连击队列、残留特效及回溯时机，保留 0.3.0 的完整中英文切换、独立语言偏好与英文排版。0.2.1 实机通过 app-update 验证，平台下载首次安装
+版本 0.3.2 重绘进贡巨龙的鳞甲、弯角与翼膜，新增呼吸、收贡点头及震怒反应；包含 0.3.1 的发条回溯修复与中英文切换。0.2.1 实机通过 app-update 验证，平台下载首次安装
 尚待验证；此前 Vibe Mode 0.1.4 的一次 System Update 传输中重启，原因尚未确认。

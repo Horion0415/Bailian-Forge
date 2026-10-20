@@ -35,6 +35,10 @@ assets_src/prepare_assets.py generates RGB565 atlases, audio and 15 native-size
 A8 font subsets. Font outlines are required only at build time. The device does
 not need Python, FreeType or complete font files. Assets are embedded in the application, which uses the large OTA partition
 while preserving the retained Vibe Mode prefix.
+The tribute dragon is one 416×178 smooth-alpha sprite (about 217 KiB packed),
+with breathing, a small acceptance nod, and a forward motion/red-eye reaction
+for underpayment. These effects share the existing 2300 ms ceremony and leave
+settlement, RNG and the save format unchanged.
 For ESP32-S31 with GCC 16.1, SLP is disabled because it crashes across game,
 network and DMA sources in fresh builds. Other -O2 passes are retained; the
 workaround does not apply to other compiler versions or targets.

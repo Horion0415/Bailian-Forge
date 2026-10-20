@@ -28,11 +28,12 @@
     ],
     "resources": [
       "publish/sword-evolution.gif",
-      "publish/english.png"
+      "publish/english.png",
+      "publish/tribute-dragon.png"
     ],
     "attachments": []
   },
   "release": {
-    "changelog": "0.3.1: correct clockwork rewind cleanup, prevent buffered automatic strikes, preserve active swings on failed rewinds and keep undo when reselecting the current tab."
+    "changelog": "0.3.2: replace the tribute silhouette with a detailed dragon sprite, breathing motion and distinct acceptance/anger reactions. Includes the 0.3.1 clockwork rewind fixes."
   }
 }

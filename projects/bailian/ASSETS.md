@@ -2,7 +2,7 @@
 
 ## 图像
 
-assets_src 下 forge-room.png、hammer.png、swords.png、relics.png 为本次实现使用内置 ImageGen 生成的原创游戏素材。背景、手持锤、十种剑与十六个类别图标分开生成，构建脚本负责缩放、切格和 RGB565 量化。未提取原版游戏的图片、模型、音频、标志或代码。
+assets_src 下 forge-room.png、hammer.png、swords.png、relics.png、tribute-dragon.png 为本次实现使用内置 ImageGen 生成的原创游戏素材。背景、手持锤、十种剑、十六个类别图标与进贡巨龙分开生成，构建脚本负责缩放、切格和 RGB565 量化。未提取原版游戏的图片、模型、音频、标志或代码。
 
 视觉方向为暗色中世纪石砌铁匠铺：左侧暖橙熔炉，右侧铁栅与龙眼，中央铁砧，金色/象牙色中文界面，固定第一人称。原图保留透明通道，刀剑与锤子由共享 C 渲染器独立移动/旋转。
 
@@ -31,7 +31,7 @@ hit/great/damage/break/bell/select/heat/frenzy.wav 及 .sound 为本项目确定
 
 新增的光晕、热浪、粒子、镜头偏移、刀刃切片和飘字由 main/forge_effects.c 与共享原生 C 渲染器实时生成，复用已有刀剑图片，不新增提取的原版素材。设计方向参考 [原作 Steam 介绍](https://store.steampowered.com/app/5245810/ForgeTax/) 的第一人称加热、落锤、碎刀与短时入神爆发；具体光色、震幅和回弹曲线为本项目的小屏适配参数。
 
-进贡仪式中的龙影、眼部光晕、贡台刻度环和金币轨迹由 main/forge_tribute.c 在同一 C 渲染器中生成，贡剑复用本项目剑图。它们是本项目的程序化视觉设计，不使用从原作提取的图像。
+进贡巨龙使用独立透明素材 tribute-dragon.png，参考本项目 forge-room.png 的暖色光照生成，规格与提示词保存在 assets_src/tribute-dragon-prompt.txt。构建期缩至 416×178，打包为一帧 RGB565+A8 的 dragon.atlas，保留翼膜、鳞甲及平滑透明边缘；图集约 217 KiB，不含多帧大图。main/forge_tribute.c 在共享 C 渲染器中实现呼吸起伏、收贡点头、欠贡时的短暂前探/红色眼光与鼻息余烬；眼部坐标随精灵变换，局部光晕不会覆盖整张龙脸。贡台刻度环、金币轨迹和粒子保持程序化绘制，贡剑复用本项目剑图。上述视觉不改变结算时间、存档或游戏随机序列。
 
 剑体形态新增四张透明图集 swords-plus3.png / swords-plus6.png / swords-plus10.png / swords-plus20.png，使用内置 ImageGen 参考本项目原始 swords.png 生成。每张保留十个剑系，分别强调初锻、精锻、名匠及传说阶段的刀刃、护手、柄首和纹饰变化，未使用提取的原作图像。生成规格记录在 assets_src/sword-forms.json。构建期仅进行独立精灵提取、尺寸适配、刃线对齐及透明留白打包，源 PNG 保持完整；五阶段共 50 个精灵。
 
