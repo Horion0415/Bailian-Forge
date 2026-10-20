@@ -1,0 +1,17 @@
+Bailian Forge
+
+Game code is distributed under Apache-2.0; see LICENSE.
+
+The workspace launcher and configuration are based on esp-mosaico/esp-mosaico-vibe
+v26.0.2, commit dd63f3a742686d90046dd4eb003a4f8eb1ad05f1.
+Board support, product tools and Raylib Lite Engine are pinned upstream submodules.
+Their notices and licenses remain with those projects. Local engine changes are
+distributed in patches/raylib-lite-engine.patch.
+
+Noto Sans CJK fonts and baked glyph subsets are covered by SIL OFL 1.1;
+see projects/bailian/licenses/Noto-OFL.txt.
+
+Artwork was generated with ImageGen. Sound effects are synthesized by the asset
+pipeline. Asset and gameplay references are in projects/bailian/ASSETS.md.
+This project is inspired by ForgeTax. It is not an official ForgeTax release
+or a verified reproduction of its implementation.

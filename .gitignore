@@ -1,0 +1,25 @@
+**/build*/
+**/managed_components/
+**/sdkconfig
+**/sdkconfig.old
+**/.codex-runs/
+**/__pycache__/
+**/*.py[cod]
+/.tools/
+/artifacts/
+**/assets/generated/
+/.mosaico-state/
+
+# Local agent experiments; shared skills and tools remain versioned.
+/.agents/analysis/
+
+# Local game verification and release output.
+**/tests/artifacts/
+**/.pytest_cache/
+**/.venv/
+/dist/
+*.irisfw
+*.elf
+*.o
+*.so
+.DS_Store

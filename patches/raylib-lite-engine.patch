@@ -1,0 +1,433 @@
+diff --git a/README.md b/README.md
+index aef91cf..c67441e 100644
+--- a/README.md
++++ b/README.md
+@@ -68,3 +68,19 @@ The workspace product CLI creates them and invokes this engine's public
+ `host/run_game.py --project PATH` simulator. The engine does not own a workspace
+ creation CLI or depend on the vibe repository layout. Run `python -m unittest
+ discover -s tests -v` for engine implementation tests.
++
++### Browser preview media
++
++`game.sim.json` may declare `display.image_rendering` as `auto` for illustrated
++UI (default: `pixelated`), and `audio.clips` as a mapping from clip identifiers to
++project-relative WAV paths. Optional boolean `audio_muted` metadata gates playback, stops active voices and clears pending events; absent metadata preserves normal playback. The native Host module can append `audio_events` to
++its existing state JSON: `{ "seq": 1, "clip": "hit", "volume": 0.8 }` entries
++with increasing sequence numbers. The browser deduplicates events, unlocks Web
++Audio from the first game pointer/key gesture, and provides a mute button. Only
++manifest-declared project-local WAV files are served. These optional fields do
++not change Host ABI v1 or implement game logic in the browser. Restart the preview
++server after changing browser media settings.
++
++`Mosaico2DDrawAlphaMask` draws a borrowed A8 mask at native size, honoring the 2D
++clip. It enables build-time glyph subsets without an RGB texture or runtime font
++library. RGB565 alpha blending interpolates each color channel independently.
+diff --git a/components/mosaico_game_2d/include/mosaico_game_2d.h b/components/mosaico_game_2d/include/mosaico_game_2d.h
+index 04c4340..54b1fac 100644
+--- a/components/mosaico_game_2d/include/mosaico_game_2d.h
++++ b/components/mosaico_game_2d/include/mosaico_game_2d.h
+@@ -45,6 +45,10 @@ void UnloadMosaicoAtlas(MosaicoAtlas atlas);
+ Texture2D Mosaico2DLoadTexture(const char *asset_path);
+ void Mosaico2DUnloadTexture(Texture2D texture);
+ void Mosaico2DDrawTexturePro(Texture2D texture,Rectangle source,Rectangle dest,Vector2 origin,float rotation,Color tint);
++/* Draw a borrowed A8 coverage mask at native pixel size, honoring the 2D clip.
++ * The caller retains mask ownership; no buffer is retained after this call. */
++void Mosaico2DDrawAlphaMask(const uint8_t *mask,size_t stride,int width,int height,
++                          int x,int y,Color color);
+ void Mosaico2DDrawTileRow(Texture2D texture,const uint16_t *tile_ids,
+     size_t tile_count,int tile_width,int tile_height,int dest_x,int dest_y);
+ #ifdef __cplusplus
+diff --git a/components/mosaico_game_2d/mosaico_game_2d.c b/components/mosaico_game_2d/mosaico_game_2d.c
+index 0de7ba9..3e075df 100644
+--- a/components/mosaico_game_2d/mosaico_game_2d.c
++++ b/components/mosaico_game_2d/mosaico_game_2d.c
+@@ -37,7 +37,35 @@ Texture2D Mosaico2DLoadTexture(const char *path){
+  return(Texture2D){0};}
+ void Mosaico2DUnloadTexture(Texture2D texture){texture_slot_t*s=texture_slot(texture);if(s)memset(s,0,sizeof(*s));}
+ static inline uint16_t tint565(uint16_t p,Color t){if(t.r==255&&t.g==255&&t.b==255)return p;return(uint16_t)((((p>>11)&31U)*t.r/255U)<<11|(((p>>5)&63U)*t.g/255U)<<5|((p&31U)*t.b/255U));}
+-static inline uint16_t blend565(uint16_t d,uint16_t s,unsigned a){if(a>=255)return s;unsigned ia=255-a;return(uint16_t)(((((s&0xf81fU)*a+(d&0xf81fU)*ia)>>8)&0xf81fU)|((((s&0x07e0U)*a+(d&0x07e0U)*ia)>>8)&0x07e0U));}
++static inline uint16_t blend565(uint16_t d,uint16_t s,unsigned a)
++{
++ if(a>=255)return s;
++ unsigned ia=255-a;
++ /* Packed red/blue multiplication leaks fractional red bits into blue. */
++ unsigned r=(((s>>11)&31U)*a+((d>>11)&31U)*ia+127U)/255U;
++ unsigned g=(((s>>5)&63U)*a+((d>>5)&63U)*ia+127U)/255U;
++ unsigned b=((s&31U)*a+(d&31U)*ia+127U)/255U;
++ return(uint16_t)((r<<11)|(g<<5)|b);
++}
++void Mosaico2DDrawAlphaMask(const uint8_t *mask,size_t stride,int width,int height,
++                          int x,int y,Color color)
++{
++ if(!mask||!s_target||width<=0||height<=0||stride<(size_t)width||!color.a)return;
++ int x0=x<s_clip_x0?s_clip_x0:x,y0=y<s_clip_y0?s_clip_y0:y;
++ int64_t right=(int64_t)x+width,bottom=(int64_t)y+height;
++ int x1=right>s_clip_x1?s_clip_x1:(int)right;
++ int y1=bottom>s_clip_y1?s_clip_y1:(int)bottom;
++ if(x0>=x1||y0>=y1)return;
++ uint16_t source=(uint16_t)(((color.r>>3)<<11)|((color.g>>2)<<5)|(color.b>>3));
++ for(int row=y0;row<y1;row++){
++  const uint8_t *src=mask+(size_t)(row-y)*stride+(size_t)(x0-x);
++  uint16_t *dst=s_target+(size_t)row*s_stride+x0;
++  for(int col=x0;col<x1;col++,src++,dst++){
++   unsigned alpha=(unsigned)*src*color.a/255U;
++   if(alpha)*dst=blend565(*dst,source,alpha);
++  }
++ }
++}
+ typedef struct{int value,base,remainder,denominator,error;} sample_step_t;
+ static sample_step_t sample_step(int start,int numerator,int denominator){
+  int64_t scaled=(int64_t)start*numerator;
+diff --git a/host/run_game.py b/host/run_game.py
+index 1310ed2..282ed66 100644
+--- a/host/run_game.py
++++ b/host/run_game.py
+@@ -129,9 +129,30 @@ def prepare_project_assets(project: Path) -> None:
+             "--output", str(project / "assets/generated"),
+         ])
+ 
++def preview_media(project: Path) -> tuple[dict[str, Path], str]:
++    """Only manifest-declared, project-local WAV files may be served."""
++    manifest = json.loads((project / "game.sim.json").read_text(encoding="utf-8"))
++    clips = {}
++    for name, value in manifest.get("audio", {}).get("clips", {}).items():
++        path = (project / str(value)).resolve()
++        if not str(name).replace("_", "").replace("-", "").isalnum():
++            raise ValueError(f"invalid audio clip identifier: {name}")
++        try:
++            path.relative_to(project.resolve())
++        except ValueError as error:
++            raise ValueError(f"audio clip leaves project: {value}") from error
++        if path.suffix.lower() != ".wav" or not path.is_file():
++            raise ValueError(f"audio clip is not an existing WAV file: {value}")
++        clips[str(name)] = path
++    rendering = manifest.get("display", {}).get("image_rendering", "pixelated")
++    if rendering not in ("auto", "pixelated"):
++        raise ValueError(f"unsupported image rendering: {rendering}")
++    return clips, rendering
++
+ class GenericHostRuntime:
+     """Versioned C module; Python never mirrors project-owned game structs."""
+     def __init__(self, project: Path, directory: Path, generation: int = 0) -> None:
++        self.project = project
+         manifest_path = project / "game.sim.json"
+         suffix = ".dll" if os.name == "nt" else ".so"
+         library = directory / f"host_game_{generation}{suffix}"
+@@ -298,7 +319,7 @@ class ReloadableHostRuntime:
+                   else assets.glob("*.png"))
+         return [*self.project.joinpath("main").glob("*.[ch]"),
+                 self.project / "game.sim.json", *images,
+-                *assets.glob("*.json"), prepare]
++                *assets.glob("*.json"), *assets.glob("*.py"), prepare]
+     def _stamp(self) -> int:
+         return max((path.stat().st_mtime_ns for path in self._watched()
+                     if path.is_file()), default=0)
+@@ -390,6 +411,7 @@ def run_generic(project: Path, directory: Path, frames: int, output: Path,
+     return result
+ 
+ def serve_interactive_preview(listen: str, port: int, runtime: object) -> None:
++    clips, rendering = preview_media(runtime.project)
+     simulation = {"paused": False, "speed": 1.0,
+                   "actions": {"left": False, "right": False, "jump": False,
+                               "back": False, "fire": False},
+@@ -413,22 +435,24 @@ def serve_interactive_preview(listen: str, port: int, runtime: object) -> None:
+ <meta name=viewport content="width=device-width,initial-scale=1,user-scalable=no">
+ <title>Mosaico game simulator</title><style>
+ body{margin:0;background:#07111c;color:#dff;font:14px system-ui;display:grid;place-items:center;min-height:100vh}
+-main{position:relative;padding:16px;background:#0c2030;border:1px solid #299fad;border-radius:16px;box-shadow:0 18px 80px #000;width:min(512px,calc(100vw - 24px))}
+-img{width:480px;height:480px;max-width:100%;aspect-ratio:1/1;object-fit:contain;display:block;image-rendering:pixelated;touch-action:none}
++main{box-sizing:border-box;position:relative;padding:12px;background:#0c2030;border:1px solid #299fad;border-radius:16px;box-shadow:0 18px 80px #000;width:min(506px,calc(100vw - 12px))}
++img{width:100%;height:auto;max-width:100%;aspect-ratio:1/1;object-fit:contain;display:block;image-rendering:pixelated;touch-action:none}
+ #state{margin-top:10px;color:#9ee;white-space:pre-wrap;height:4.8em;overflow:hidden;line-height:1.35}
+ .hint{color:#fff;margin-top:8px}.tools{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}button,select{background:#17364b;color:#dff;border:1px solid #299fad;border-radius:6px;padding:6px 10px}
+-</style></head><body><main><div class=tools><button id=pause>Pause</button><button id=step>Step</button><button id=reset>Reset</button><button id=shot>Screenshot</button><button id=record>Record</button><select id=speed><option>.25</option><option>.5</option><option selected>1</option><option>2</option></select></div><img id=screen tabindex=0 draggable=false><div id=state></div>
++</style></head><body><main><div class=tools><button id=pause>Pause</button><button id=step>Step</button><button id=reset>Reset</button><button id=shot>Screenshot</button><button id=record>Record</button><button id=audio type=button>开启音效</button><select id=speed><option>.25</option><option>.5</option><option selected>1</option><option>2</option></select></div><img id=screen tabindex=0 draggable=false><div id=state></div>
+ <div class=hint>Keyboard: A/D turn, W/S move, F/Ctrl fire, P pause · Touch: drag; tap crosshair to fire</div></main>
+ <script>
+ const held=new Set(), pointers=new Map(), img=document.querySelector('#screen'), state=document.querySelector('#state');
+ let busy=false, phase='start',paused=false;
+-function key(e,down){const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown',' ','a','d','w','s','f','control','p','enter'].includes(k))e.preventDefault();
++// Audio playback uses native game events and manifest-declared WAV assets.
++__PREVIEW_AUDIO__
++function key(e,down){if(down)previewAudio.unlock();const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown',' ','a','d','w','s','f','control','p','enter'].includes(k))e.preventDefault();
+  if(down&&!held.has(k)&&k==='p')control(paused?'resume':'pause');
+  if(down&&!held.has(k)&&k==='enter')control('continue'); down?held.add(k):held.delete(k);sendInput()}
+ addEventListener('keydown',e=>key(e,true));addEventListener('keyup',e=>key(e,false));
+ function pointer(e,down){e.preventDefault();const r=img.getBoundingClientRect();
+  const p={x:(e.clientX-r.left)*480/r.width,y:(e.clientY-r.top)*480/r.height};down?pointers.set(e.pointerId,p):pointers.delete(e.pointerId)}
+-img.onpointerdown=e=>{img.focus();img.setPointerCapture(e.pointerId);pointer(e,true);sendInput()};
++img.onpointerdown=e=>{previewAudio.unlock();img.focus();img.setPointerCapture(e.pointerId);pointer(e,true);sendInput()};
+ img.onpointermove=e=>{if(pointers.has(e.pointerId)){pointer(e,true);sendInput()}};
+ img.onpointerup=img.onpointercancel=e=>{pointer(e,false);sendInput()};
+ addEventListener('blur',()=>{held.clear();pointers.clear()});
+@@ -438,14 +462,16 @@ async function sendInput(){let left=held.has('a')||held.has('arrowleft'),right=h
+ async function control(command){await fetch('/api/v1/control',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({command})})}
+ async function tick(){if(busy)return;busy=true;
+  try{const res=await fetch('/api/v1/frame');const meta=JSON.parse(res.headers.get('X-Mosaico-State'));const blob=await res.blob();
+- phase=meta.phase;const old=img.src,url=URL.createObjectURL(blob);img.onload=()=>{if(old.startsWith('blob:'))URL.revokeObjectURL(old);img.onload=null};img.src=url;
++ previewAudio.consume(meta.audio_events||[],meta.reload_generation||0,meta.audio_muted===true);phase=meta.phase;const old=img.src,url=URL.createObjectURL(blob);img.onload=()=>{if(old.startsWith('blob:'))URL.revokeObjectURL(old);img.onload=null};img.src=url;
+  paused=meta.simulation.paused;const fields=Object.entries(meta).filter(([k])=>!['simulation','reload_error','title'].includes(k)).map(([k,v])=>`${k}=${v}`).join('  ');
+  state.textContent=`${meta.title||meta.game_id||'Mosaico game'}\nLogic ${meta.simulation.logic_fps.toFixed(1)} Hz  Raster ${meta.host_render_ms.toFixed(2)} ms  PNG ${meta.host_encode_ms.toFixed(2)} ms\n${fields}`}
+  finally{busy=false}}
+ pause.onclick=()=>control(paused?'resume':'pause');step.onclick=()=>control('step');reset.onclick=()=>control('reset');speed.onchange=()=>control('speed:'+speed.value);shot.onclick=()=>{const a=document.createElement('a');a.href=img.src;a.download='mosaico-game.png';a.click()};record.onclick=async()=>{if(!metaRecording()){await control('record');record.textContent='Stop record'}else{await control('record');const a=document.createElement('a');a.href='/api/v1/recording';a.download='scenario.json';a.click();record.textContent='Record'}};
+ function metaRecording(){return record.textContent==='Stop record'}
+ let lastFrame=0;function animate(now){if(now-lastFrame>=32){lastFrame=now;tick()}requestAnimationFrame(animate)}requestAnimationFrame(animate);
+-</script></body></html>""".encode("utf-8")
++</script></body></html>""".replace("image-rendering:pixelated", f"image-rendering:{rendering}")
++    audio_script = (ENGINE_ROOT / "host/preview_audio.js").read_text(encoding="utf-8")
++    page = page.replace("__PREVIEW_AUDIO__", audio_script).encode("utf-8")
+     class Handler(BaseHTTPRequestHandler):
+         def metadata(self) -> dict[str, object]:
+             elapsed = max(.001, time.monotonic() - float(simulation["started"]))
+@@ -461,9 +487,16 @@ let lastFrame=0;function animate(now){if(now-lastFrame>=32){lastFrame=now;tick()
+                 with runtime.lock:
+                     body, metadata = runtime.frame(), self.metadata()
+                 content_type = "image/png"
++            elif self.path.startswith("/api/v1/audio/"):
++                name = self.path.removeprefix("/api/v1/audio/")
++                if name not in clips:
++                    self.send_error(404); return
++                body = clips[name].read_bytes()
++                metadata, content_type = {}, "audio/wav"
+             elif self.path.startswith("/api/v1/info"):
+                 body = json.dumps({"abi": 1, "endpoints": ["info","state","frame","input","control","recording"],
+-                    "controls": ["pause","resume","step","reset","speed","record"]}).encode()
++                    "controls": ["pause","resume","step","reset","speed","record"],
++                    "audio_clips": {name: "/api/v1/audio/" + name for name in clips}}).encode()
+                 metadata, content_type = self.metadata(), "application/json"
+             elif self.path.startswith("/api/v1/state"):
+                 metadata = self.metadata(); body = json.dumps(metadata).encode(); content_type="application/json"
+diff --git a/tests/test_raylib_fast.py b/tests/test_raylib_fast.py
+index b88b07a..fe54b27 100644
+--- a/tests/test_raylib_fast.py
++++ b/tests/test_raylib_fast.py
+@@ -36,6 +36,14 @@ class RaylibFastHostTests(unittest.TestCase):
+                 struct.pack("<4sHHHHII", b"MSA1", 4, 3, 0, 0,
+                             len(pixels), len(smooth_alpha)) + pixels + smooth_alpha
+             )
++            ramp_pixels = struct.pack("<1024H", *(
++                color for color in (0xf800, 0x07e0, 0x001f, 0xffff)
++                for _ in range(256)))
++            ramp_alpha = bytes(range(256)) * 4
++            (temp / "ramp.atlas").write_bytes(
++                struct.pack("<4sHHHHII", b"MSA1", 256, 4, 0, 0,
++                            len(ramp_pixels), len(ramp_alpha)) + ramp_pixels + ramp_alpha
++            )
+             command = [
+                 compiler, "-std=c11", "-Wall", "-Wextra", "-Werror",
+                 str(ROOT / "tests/test_raylib_fast_host.c"),
+diff --git a/tests/test_raylib_fast_host.c b/tests/test_raylib_fast_host.c
+index 55152d7..f0bd9b5 100644
+--- a/tests/test_raylib_fast_host.c
++++ b/tests/test_raylib_fast_host.c
+@@ -136,6 +136,39 @@ int main(int argc, char **argv)
+     assert(framebuffer[80 * 480 + 85] == 0);
+     UnloadTexture(smooth_texture);
+ 
++    /* Every alpha value must preserve independent RGB channels. In particular
++     * fractional red coverage must never create blue glyph fringes. */
++    Texture2D ramp = Mosaico2DLoadTexture("ramp.atlas");
++    assert(ramp.id);
++    BeginDrawing();
++    ClearBackground(BLACK);
++    DrawTexture(ramp, 0, 0, WHITE);
++    EndDrawing();
++    for (unsigned a = 0; a < 256; a++) {
++        unsigned r = (31 * a + 127) / 255, g = (63 * a + 127) / 255;
++        assert(framebuffer[a] == r << 11);
++        assert(framebuffer[480 + a] == g << 5);
++        assert(framebuffer[960 + a] == r);
++        assert(framebuffer[1440 + a] == ((r << 11) | (g << 5) | r));
++    }
++    UnloadTexture(ramp);
++    const uint8_t coverage[4] = {0, 17, 129, 255};
++    BeginDrawing();
++    ClearBackground(BLACK);
++    Mosaico2DDrawAlphaMask(coverage, 4, 4, 1, 10, 10, (Color){239,193,115,255});
++    BeginScissorMode(12, 12, 1, 1);
++    Mosaico2DDrawAlphaMask(coverage, 4, 4, 1, 10, 12, WHITE);
++    EndScissorMode();
++    EndDrawing();
++    for (unsigned x = 0; x < 4; x++) {
++        unsigned a = coverage[x];
++        uint16_t expected = (uint16_t)((((29*a+127)/255)<<11) |
++            (((48*a+127)/255)<<5) | ((14*a+127)/255));
++        assert(framebuffer[10*480+10+x] == expected);
++        if (x != 2) assert(framebuffer[12*480+10+x] == 0);
++    }
++    assert(framebuffer[12*480+12] != 0);
++
+     assert(CheckCollisionCircleRec((Vector2){10, 10}, 5,
+                                    (Rectangle){12, 12, 5, 5}));
+     assert(CheckCollisionPointTriangle((Vector2){2, 2}, (Vector2){0, 0},
+diff --git a/host/preview_audio.js b/host/preview_audio.js
+new file mode 100644
+index 0000000..b7095f4
+--- /dev/null
++++ b/host/preview_audio.js
+@@ -0,0 +1,89 @@
++// Generic preview audio: the C module supplies sequenced audio_events; only
++// manifest-declared WAV files are decoded. No gameplay is implemented here.
++const previewAudio = (() => {
++  const button = document.querySelector('#audio');
++  let context, master, preparation, enabled = false, userMuted = false;
++  let sourceMuted = false;
++  let lastSequence = 0, generation = 0, played = 0;
++  const buffers = new Map();
++  const pending = [];
++  const active = new Set();
++  function stopPlaying() {
++    pending.length = 0;
++    for (const source of active) {try {source.stop();} catch (_) {}}
++    active.clear();
++  }
++  function update() {
++    button.textContent = sourceMuted ? '游戏已静音' : enabled ? '音效：开' : '开启音效';
++    button.title = sourceMuted ? '在游戏内关闭静音即可恢复音效' : `已播放 ${played} 次`;
++    button.dataset.played = String(played);
++    button.dataset.ready = String(Boolean(context && context.state === 'running'));
++  }
++  function flush() {
++    while (pending.length) {
++      const event = pending.shift(), buffer = buffers.get(event.clip);
++      if (!enabled || sourceMuted || !buffer || Date.now() - event.received > 1200) continue;
++      const source = context.createBufferSource(), gain = context.createGain();
++      source.buffer = buffer;
++      gain.gain.value = Math.max(0, Math.min(1, Number(event.volume) || 0));
++      source.connect(gain); gain.connect(master);
++      active.add(source); source.onended = () => active.delete(source);
++      source.start(); played++;
++    }
++    update();
++  }
++  async function prepare() {
++    const infoResponse = await fetch('/api/v1/info');
++    if (!infoResponse.ok) throw Error('audio manifest unavailable');
++    const info = await infoResponse.json();
++    await Promise.all(Object.entries(info.audio_clips || {}).map(async ([name, url]) => {
++      const response = await fetch(url);
++      if (!response.ok) throw Error('audio clip unavailable');
++      buffers.set(name, await context.decodeAudioData(await response.arrayBuffer()));
++    }));
++  }
++  function unlock(force = false) {
++    if (userMuted && !force) return;
++    try {
++      if (!context) {
++        const Audio = window.AudioContext || window.webkitAudioContext;
++        if (!Audio) throw Error('Web Audio unavailable');
++        context = new Audio(); master = context.createGain(); master.connect(context.destination);
++      }
++      // resume must run directly within the pointer/key gesture, before fetch.
++      const resumed = context.resume();
++      userMuted = false; enabled = true; master.gain.value = sourceMuted ? 0 : 0.85; update();
++      if (!preparation) preparation = prepare();
++      Promise.all([resumed, preparation]).then(flush).catch(() => {
++        enabled = false; preparation = null; update(); button.textContent = '重试音效';
++      });
++    } catch (_) {
++      enabled = false; update(); button.textContent = '音效不可用';
++    }
++  }
++  function consume(events, currentGeneration, muted = false) {
++    if (sourceMuted !== Boolean(muted)) {
++      sourceMuted = Boolean(muted);
++      if (sourceMuted) stopPlaying();
++      if (master) master.gain.value = enabled && !sourceMuted ? 0.85 : 0;
++      update();
++    }
++    if (currentGeneration !== generation) {
++      generation = currentGeneration; lastSequence = 0; stopPlaying();
++    }
++    for (const event of events) {
++      if (!Number.isSafeInteger(event.seq) || event.seq <= lastSequence) continue;
++      lastSequence = event.seq;
++      if (enabled && !sourceMuted) pending.push({...event, received: Date.now()});
++    }
++    if (pending.length > 16) pending.splice(0, pending.length - 16);
++    if (enabled && preparation) preparation.then(flush).catch(() => {});
++  }
++  button.onclick = () => {
++    if (sourceMuted) return;
++    if (enabled) {userMuted = true; enabled = false; master.gain.value = 0; stopPlaying(); update();}
++    else unlock(true);
++  };
++  update();
++  return {unlock, consume};
++})();
+diff --git a/tests/test_preview_audio.cjs b/tests/test_preview_audio.cjs
+new file mode 100644
+index 0000000..eba99b1
+--- /dev/null
++++ b/tests/test_preview_audio.cjs
+@@ -0,0 +1,33 @@
++const assert = require('node:assert/strict');
++const fs = require('node:fs');
++const vm = require('node:vm');
++const calls = [], sources = [], stopped = [], button = {dataset:{}};
++class AudioContext {
++  constructor(){this.state='suspended';this.destination={};}
++  resume(){calls.push('resume');this.state='running';return Promise.resolve();}
++  createGain(){return {gain:{value:1},connect(){}};}
++  createBufferSource(){return {connect(){},start(){sources.push(this.buffer);},stop(){stopped.push(this);if(this.onended)this.onended();}};}
++  decodeAudioData(){return Promise.resolve({samples:true});}
++}
++const context=vm.createContext({document:{querySelector(){return button;}},window:{AudioContext},Date,Map,Number,Promise,
++  fetch:async(url)=>{calls.push('fetch');return {ok:true,json:async()=>({audio_clips:{hit:'/api/v1/audio/hit'}}),arrayBuffer:async()=>new ArrayBuffer(4)};}});
++vm.runInContext(fs.readFileSync(process.argv[2],'utf8'),context);
++const run=code=>vm.runInContext(code,context);
++const settle=()=>new Promise(resolve=>setImmediate(resolve));
++(async()=>{
++  run('previewAudio.unlock()');await settle();
++  assert.equal(calls[0],'resume');assert.equal(button.dataset.ready,'true');
++  run('previewAudio.consume([{seq:1,clip:"hit",volume:.8}],0)');await settle();assert.equal(sources.length,1);
++  run('previewAudio.consume([{seq:1,clip:"hit",volume:.8}],0)');await settle();assert.equal(sources.length,1);
++  button.onclick();run('previewAudio.unlock();previewAudio.consume([{seq:2,clip:"hit",volume:.8}],0)');await settle();assert.equal(sources.length,1);
++  button.onclick();run('previewAudio.consume([{seq:3,clip:"hit",volume:.8}],0)');await settle();assert.equal(sources.length,2);
++  run('previewAudio.consume([{seq:1,clip:"hit",volume:.8}],1)');await settle();assert.equal(sources.length,3);
++  run('previewAudio.consume([{seq:2,clip:"hit",volume:.8}],1,true)');await settle();
++  assert.equal(sources.length,3);assert.equal(stopped.length,3);assert.equal(button.textContent,'游戏已静音');
++  button.onclick();run('previewAudio.unlock();previewAudio.consume([{seq:3,clip:"hit",volume:.8}],1,true)');await settle();assert.equal(sources.length,3);
++  run('previewAudio.consume([{seq:3,clip:"hit",volume:.8}],1,false)');await settle();assert.equal(sources.length,3);
++  run('previewAudio.consume([{seq:4,clip:"hit",volume:.8}],1,false)');await settle();assert.equal(sources.length,4);
++  button.onclick();
++  run('previewAudio.consume([],1,true);previewAudio.consume([{seq:5,clip:"hit",volume:.8}],1,false)');await settle();assert.equal(sources.length,4);
++  button.onclick();run('previewAudio.consume([{seq:6,clip:"hit",volume:.8}],1)');await settle();assert.equal(sources.length,5);
++})().catch(error=>{console.error(error);process.exitCode=1;});
+diff --git a/tests/test_preview_media.py b/tests/test_preview_media.py
+new file mode 100644
+index 0000000..905fc7c
+--- /dev/null
++++ b/tests/test_preview_media.py
+@@ -0,0 +1,31 @@
++from pathlib import Path
++import importlib.util
++import json
++import shutil
++import subprocess
++import tempfile
++import unittest
++
++ROOT = Path(__file__).resolve().parents[1]
++SPEC = importlib.util.spec_from_file_location('preview_media_runtime', ROOT/'host/run_game.py')
++HOST = importlib.util.module_from_spec(SPEC)
++SPEC.loader.exec_module(HOST)
++
++class PreviewMediaTests(unittest.TestCase):
++    def test_declared_local_clip_and_smooth_image(self):
++        with tempfile.TemporaryDirectory() as directory:
++            root=Path(directory);(root/'hit.wav').write_bytes(b'RIFF')
++            (root/'game.sim.json').write_text(json.dumps({'audio':{'clips':{'hit':'hit.wav'}},'display':{'image_rendering':'auto'}}))
++            clips,rendering=HOST.preview_media(root)
++            self.assertEqual(clips,{'hit':root/'hit.wav'})
++            self.assertEqual(rendering,'auto')
++
++    def test_media_cannot_escape_project(self):
++        with tempfile.TemporaryDirectory() as directory:
++            root=Path(directory)
++            (root/'game.sim.json').write_text(json.dumps({'audio':{'clips':{'hit':'../outside.wav'}}}))
++            with self.assertRaisesRegex(ValueError,'leaves project'):HOST.preview_media(root)
++
++    @unittest.skipUnless(shutil.which('node'),'Node required for Web Audio event tests')
++    def test_audio_gesture_dedup_mute_and_reload(self):
++        subprocess.run(['node',str(ROOT/'tests/test_preview_audio.cjs'),str(ROOT/'host/preview_audio.js')],check=True)

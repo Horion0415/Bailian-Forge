@@ -1,0 +1,38 @@
+{
+  "workspace": {
+    "url": "https://github.com/esp-mosaico/esp-mosaico-vibe.git",
+    "tag": "v26.0.2",
+    "commit": "dd63f3a742686d90046dd4eb003a4f8eb1ad05f1"
+  },
+  "esp_idf": {
+    "commit": "7b9cc1ac79f865983f59bb8ff3ff43eb74ff1dbe",
+    "target": "esp32s31"
+  },
+  "submodules": {
+    "esp-mosaico-bsp": "a2c985ad698b3f04a21c63e006b43e7e948bc1d7",
+    "esp-mosaico-utils": "fc63d43f3ac72aa54e701b07b07fbed07a16b3ca",
+    "raylib-lite-engine": "ca3200a6b7f63e2bdea07851e19fdbd3a42eb742"
+  },
+  "local_patches": {
+    "raylib-lite-engine": {
+      "patch_sha256": "364db69d4d8677294053e54f44157e7e3cbc409cd191802d56b7aab1e48260ca",
+      "files": {
+        "README.md": "bc541a2b7a40d90cefbba29397b3ccd5cf29b4c337859213158c8ed7e4508d88",
+        "components/mosaico_game_2d/include/mosaico_game_2d.h": "59914a75341f3923ac51bb193c5072a7a83f4a5bbf2c659dd9e2c131bfe02579",
+        "components/mosaico_game_2d/mosaico_game_2d.c": "da60e6815d5ae545da3bbdfcfc3623f0213bc55d7a7b04ac15803390a68d7222",
+        "host/run_game.py": "b85637895d69f6354acca67ed65304fe658fe13b48e3349dcdb4a9852221028a",
+        "tests/test_raylib_fast.py": "7391c297de4c0c16b574317245939354aa57651622cd48a148e63aa44c634cfd",
+        "tests/test_raylib_fast_host.c": "686c4452bea3902c5c78fb3dd57bb564bb027a9e42f9321156b96177bb5a1bcb",
+        "host/preview_audio.js": "b3c4a0d1d1096046e8c05e4c9cd582a7d633596b30dd3e740ddae98b1aef96f8",
+        "tests/test_preview_audio.cjs": "22336eaaf34b44059c64f8aa0ed1dedf54c1abc661da86fad052ff8d4c443373",
+        "tests/test_preview_media.py": "f8352743169d5041bce024eba3c4af18f278592026fbb0f996eef00541c5581a"
+      }
+    }
+  },
+  "application": {
+    "name": "bailian",
+    "version": "0.2.1",
+    "save_payload_bytes": 24032,
+    "legacy_save_payload_bytes": 23544
+  }
+}
