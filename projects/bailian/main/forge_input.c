@@ -5,6 +5,7 @@ void game_action(game_handle_t g,int action)
 {
     if(!g)return;
     if(action==GAME_ACTION_MUTE){game_set_muted(g,!game_is_muted(g));return;}
+    if(action==GAME_ACTION_LANGUAGE){game_set_language(g,game_get_language(g)==GAME_LANGUAGE_ZH?GAME_LANGUAGE_EN:GAME_LANGUAGE_ZH);return;}
     if(action==4){game_reset(g);
         return;
         }
@@ -57,6 +58,8 @@ static unsigned list_count(game_handle_t g)
 }
 void forge_pointer(game_handle_t g,int x,int y)
 {
+    bool language_button=g->tribute.active?(x>=344&&x<392&&y>=25&&y<59):(x>=131&&x<177&&y>=10&&y<44);
+    if(language_button){game_action(g,GAME_ACTION_LANGUAGE);return;}
     bool sound_button=g->tribute.active?(x>=400&&x<444&&y>=25&&y<59):(x>=91&&x<127&&y>=10&&y<44);
     if(sound_button){game_set_muted(g,!game_is_muted(g));return;}
     if(g->tribute.active){forge_tribute_pointer(g,x,y);return;}
@@ -117,7 +120,10 @@ void forge_pointer(game_handle_t g,int x,int y)
                 g->book_tab=0;g->page=0;
             }else if(y>=300&&y<360){g->modal=MODAL_NEW;
             g->paused=false;
-            }else if(y>=371&&y<404&&x>=72&&x<408)game_set_muted(g,!game_is_muted(g));
+            }else if(y>=371&&y<404){
+                if(x>=72&&x<300)game_set_muted(g,!game_is_muted(g));
+                else if(x>=306&&x<408)game_action(g,GAME_ACTION_LANGUAGE);
+            }
         return;
         }
     if(y>=414){unsigned tab=(unsigned)x/120;

@@ -2,6 +2,7 @@
 #pragma once
 #include "game.h"
 #include "forge_frenzy.h"
+#include "forge_money.h"
 enum { FORGE_FX_PARTICLES=64, FORGE_FX_GLOW_W=96, FORGE_FX_GLOW_H=48 };
 typedef struct {
     float x,y,vx,vy,life,total,size,spin;
@@ -14,7 +15,7 @@ typedef struct {
     bool active;
     forge_frenzy_t frenzy;
     float heat,shake;
-    char value[32];
+    forge_money_t value;
     uint8_t glow[FORGE_FX_GLOW_W*FORGE_FX_GLOW_H];
     forge_fx_particle_t particles[FORGE_FX_PARTICLES];
 } forge_fx_t;

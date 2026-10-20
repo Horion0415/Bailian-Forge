@@ -144,31 +144,30 @@ void forge_tribute_draw(game_handle_t g)
     DrawRectangle(0,0,480,480,(Color){10,8,7,207});
     DrawRectangleLines(18,18,444,444,tint(c,.58f));
     DrawLine(32,76,448,76,tint(c,.35f));
-    snprintf(g->text_buffer,sizeof(g->text_buffer),"第%u日 · 敲铃进贡",t->from_day);
-    forge_text(g,g->text_buffer,35,30,25,(Color){245,225,185,255});
-    char value[32],need[32];forge_money_text(&t->amount,value,sizeof(value),true);forge_money_text(&t->need,need,sizeof(need),true);
-    snprintf(g->text_buffer,sizeof(g->text_buffer),"奉上 %s  /  贡额 %s",value,need);
-    forge_text(g,g->text_buffer,36,86,19,(Color){210,187,148,255});
+    snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"第%u日 · 敲铃进贡"),t->from_day);
+    forge_text_fit(g,g->text_buffer,35,30,301,25,(Color){245,225,185,255});
+    char value[32],need[32];forge_money_text_locale(&t->amount,value,sizeof(value),true,g->language==GAME_LANGUAGE_EN);forge_money_text_locale(&t->need,need,sizeof(need),true,g->language==GAME_LANGUAGE_EN);
+    snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"奉上 %s  /  贡额 %s"),value,need);
+    forge_text_fit(g,g->text_buffer,36,86,408,19,(Color){210,187,148,255});
     dragon(g,.35f+ease((age-350)/400)*.65f);
     altar(g);offerings(g);
     if(stage<3){
         const char *label=stage==1?(t->count?"贡剑升起":"贡台点火"):t->paid?"巨龙收下了贡品":"贡额不足 · 巨龙震怒";
-        int x=stage==1?192:t->paid?156:135;
-        forge_text(g,label,x,315,24,c);
-        if(stage==1){snprintf(g->text_buffer,sizeof(g->text_buffer),"贡剑 %u 把 · 碎铁一并奉上",t->count);
-            forge_text(g,g->text_buffer,102,354,18,(Color){206,181,142,255});}
+        forge_text_center(g,label,30,315,420,24,c);
+        if(stage==1){snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"贡剑 %u 把 · 碎铁一并奉上"),t->count);
+            forge_text_center(g,g->text_buffer,30,354,420,18,(Color){206,181,142,255});}
     }else{
         float p=clamp01((age-FORGE_TRIBUTE_COINS_MS)/900);coins(g,p);
         const char *result=t->paid?"贡额达成":t->phase_after==PHASE_LOST?"契约终结":t->anger_before==2&&t->anger_after==2?"巨龙宽恕":"欠贡已记";
-        forge_text(g,result,184,305,26,c);
+        forge_text_center(g,result,30,305,420,26,c);
         forge_money_t tally=t->reward;forge_money_scale(&tally,(uint32_t)(ease(p)*1000),1000);
-        forge_money_text(&tally,value,sizeof(value),true);
+        forge_money_text_locale(&tally,value,sizeof(value),true,g->language==GAME_LANGUAGE_EN);
         DrawRectangle(122,338,236,41,(Color){27,19,11,230});
         DrawRectangleLines(122,338,236,41,(Color){130,94,47,255});
-        snprintf(g->text_buffer,sizeof(g->text_buffer),"金币 +%s",value);
-        forge_text(g,g->text_buffer,166,345,24,(Color){255,221,141,255});
-        if(t->credit_gain){snprintf(g->text_buffer,sizeof(g->text_buffer),"剑币 +%u",t->credit_gain);
-            forge_text(g,g->text_buffer,324,350,17,(Color){242,210,147,255});}
+        snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"金币 +%s"),value);
+        forge_text_center(g,g->text_buffer,127,345,226,24,(Color){255,221,141,255});
+        if(t->credit_gain){snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"剑币 +%u"),t->credit_gain);
+            forge_text_center(g,g->text_buffer,140,399,200,17,(Color){242,210,147,255});}
     }
     if(!t->paid&&stage>=2){
         for(unsigned i=0;i<3;i++){
@@ -176,9 +175,9 @@ void forge_tribute_draw(game_handle_t g)
             DrawCircle(221+(int)i*19,391,5,i<t->anger_after?tint(c,pulse):(Color){69,49,37,255});
         }
     }else for(int i=0;i<3;i++)DrawCircle(221+i*19,391,3,i<(int)stage?c:(Color){76,59,38,255});
-    if(g->paused)forge_text(g,"仪式已暂停 · 点击继续",130,425,19,(Color){245,225,185,255});
+    if(g->paused)forge_text_center(g,"仪式已暂停 · 点击继续",30,425,420,19,(Color){245,225,185,255});
     else if(age>=FORGE_TRIBUTE_SKIP_MS){
         const char *next=t->phase_after==PHASE_CLEAR?"契约完成 · 点击继续":t->phase_after==PHASE_LOST?"炉火暂熄 · 点击继续":"新一日即将开炉 · 点击跳过";
-        forge_text(g,next,t->phase_after==PHASE_PLAY?111:132,425,18,(Color){197,171,132,255});
-    }else forge_text(g,"敲铃  ·  献贡  ·  结算",151,425,18,(Color){171,147,115,255});
+        forge_text_center(g,next,30,425,420,18,(Color){197,171,132,255});
+    }else forge_text_center(g,"敲铃  ·  献贡  ·  结算",30,425,420,18,(Color){171,147,115,255});
 }

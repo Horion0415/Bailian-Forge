@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 typedef struct game_t *game_handle_t;
+/* Stable preference values; stored independently from gameplay saves. */
+typedef enum { GAME_LANGUAGE_ZH, GAME_LANGUAGE_EN, GAME_LANGUAGE_COUNT } game_language_t;
 typedef struct {
     uint16_t width;
     uint16_t height;
@@ -32,6 +34,8 @@ void game_set_paused(game_handle_t handle, bool paused);
 /* Audio preference is independent of run saves, undo and new-game state. */
 void game_set_muted(game_handle_t handle,bool muted);
 bool game_is_muted(game_handle_t handle);
+bool game_set_language(game_handle_t handle,game_language_t language);
+game_language_t game_get_language(game_handle_t handle);
 void game_set_pointer(game_handle_t handle, int32_t x, int32_t y, bool pressed);
 void game_update(game_handle_t handle);
 void game_update_elapsed(game_handle_t handle,uint32_t elapsed_ms);

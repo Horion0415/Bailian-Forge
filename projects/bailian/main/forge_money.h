@@ -17,3 +17,4 @@ void forge_money_scale(forge_money_t *a,uint32_t numerator,uint32_t denominator)
 void forge_money_small(forge_money_t *a,uint32_t multiplier);
 uint32_t forge_money_div(forge_money_t *a,uint32_t divisor);
 void forge_money_text(const forge_money_t *value,char *out,size_t capacity,bool compact);
+void forge_money_text_locale(const forge_money_t *value,char *out,size_t capacity,bool compact,bool english);

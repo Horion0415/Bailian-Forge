@@ -38,7 +38,8 @@ typedef struct {
     char snapshot[1024];
     size_t snapshot_size;
     bool saved_muted,applied_muted;
-    int64_t audio_save_retry_at;
+    uint8_t saved_language;
+    int64_t preference_save_retry_at;
 } device_t;
 static device_t s_device;
 typedef struct { uint32_t magic,version,size,sequence,crc,reserved; } save_header_t;
@@ -73,6 +74,11 @@ static void restore_game(void)
         game_set_muted(d->game,muted!=0);d->saved_muted=muted!=0;
         ESP_LOGI(TAG,"restored audio muted=%u",muted);
     }
+    uint8_t language=GAME_LANGUAGE_ZH;
+    if(nvs_get_u8(nvs,"language",&language)==ESP_OK&&language<GAME_LANGUAGE_COUNT){
+        (void)game_set_language(d->game,(game_language_t)language);d->saved_language=language;
+        ESP_LOGI(TAG,"restored language=%u",language);
+    }
     for(unsigned slot=0;slot<2;slot++){
         size_t size=d->save_size;const char *key=slot?"slot1":"slot0";
         if(nvs_get_blob(nvs,key,d->save,&size)!=ESP_OK||size<sizeof(save_header_t)||size>d->save_size)continue;
@@ -103,18 +109,22 @@ static void apply_audio_setting(void)
     }
     d->applied_muted=muted;
 }
-static void save_audio_setting(int64_t now)
+static void save_preferences(int64_t now)
 {
     device_t *d=&s_device;bool muted=game_is_muted(d->game);
-    if(!d->storage_ready||muted==d->saved_muted||now<d->audio_save_retry_at)return;
+    uint8_t language=(uint8_t)game_get_language(d->game);
+    if(!d->storage_ready||(muted==d->saved_muted&&language==d->saved_language)||now<d->preference_save_retry_at)return;
     nvs_handle_t nvs;esp_err_t err=nvs_open_from_partition("forge_save","bailian",NVS_READWRITE,&nvs);
     if(err==ESP_OK){
-        err=nvs_set_u8(nvs,"muted",muted?1:0);if(err==ESP_OK)err=nvs_commit(nvs);
+        err=nvs_set_u8(nvs,"muted",muted?1:0);
+        if(err==ESP_OK)err=nvs_set_u8(nvs,"language",language);
+        if(err==ESP_OK)err=nvs_commit(nvs);
         uint8_t stored=2;if(err==ESP_OK){err=nvs_get_u8(nvs,"muted",&stored);if(err==ESP_OK&&stored!=(muted?1:0))err=ESP_ERR_INVALID_RESPONSE;}
+        if(err==ESP_OK){err=nvs_get_u8(nvs,"language",&stored);if(err==ESP_OK&&stored!=language)err=ESP_ERR_INVALID_RESPONSE;}
         nvs_close(nvs);
     }
-    if(err==ESP_OK){d->saved_muted=muted;ESP_LOGI(TAG,"saved audio muted=%u",muted);}
-    else{d->audio_save_retry_at=now+5000000;ESP_LOGW(TAG,"audio preference save failed: %s",esp_err_to_name(err));}
+    if(err==ESP_OK){d->saved_muted=muted;d->saved_language=language;ESP_LOGI(TAG,"saved preferences: muted=%u language=%u",muted,language);}
+    else{d->preference_save_retry_at=now+5000000;ESP_LOGW(TAG,"preference save failed: %s",esp_err_to_name(err));}
 }
 static esp_err_t snapshot_rpc(const esp_iris_rpc_request_t *request,uint8_t *out,size_t capacity,size_t *written,void *ctx)
 {
@@ -164,7 +174,7 @@ static void on_event(const mosaico_device_event_t *event)
 static void on_update(void)
 {
     device_t *d=&s_device;int64_t now=esp_timer_get_time();uint32_t ms=(uint32_t)((now-d->last_tick)/1000);d->last_tick=now;
-    apply_audio_setting();save_audio_setting(now);
+    apply_audio_setting();save_preferences(now);
     game_update_elapsed(d->game,ms);bool muted=game_is_muted(d->game);
     /* Muted feedback still drives haptics, but neither audio slot may linger. */
     for(unsigned i=0;i<(muted?2U:1U);i++){

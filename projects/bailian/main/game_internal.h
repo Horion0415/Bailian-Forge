@@ -9,6 +9,7 @@
 #include "forge_tribute.h"
 #include "forge_sword.h"
 #include "forge_swing.h"
+#include "forge_i18n.h"
 enum { FORGE_BLADES=96, FORGE_SCALE=1000000000, FORGE_PAGE_SIZE=6 };
 enum { PHASE_GIFT,PHASE_PLAY,PHASE_CLEAR,PHASE_LOST };
 enum { SCREEN_FORGE,SCREEN_RACK,SCREEN_RELICS,SCREEN_TRIBUTE,SCREEN_MERCHANT,SCREEN_ITEMS,SCREEN_BOOK,SCREEN_PAUSE };
@@ -76,6 +77,7 @@ struct game_t {
     mosaico_asset_view_t font;
     uint8_t *save_buffer;
     bool audio_muted;
+    uint8_t language;
 };
 bool forge_has(const forge_state_t *s,int id);
 forge_blade_t *forge_active(game_handle_t g);
@@ -113,3 +115,7 @@ void forge_pointer(game_handle_t g,int x,int y);
 void forge_particles(game_handle_t g,int kind);
 void forge_text(game_handle_t g,const char *text,int x,int y,int size,Color color);
 void forge_audio_button(game_handle_t g,int x,int y,int width);
+void forge_language_button(game_handle_t g,int x,int y,int width);
+int forge_text_width(game_handle_t g,const char *text,int size);
+void forge_text_fit(game_handle_t g,const char *text,int x,int y,int width,int size,Color color);
+void forge_text_center(game_handle_t g,const char *text,int x,int y,int width,int size,Color color);

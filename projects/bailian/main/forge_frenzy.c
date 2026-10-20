@@ -157,8 +157,9 @@ void forge_frenzy_label(game_handle_t g)
     float t=(float)age/ENTRY_MS,fade=a*ease(t/.1f)*(1-ease((t-.62f)/.38f));
     int y=118-(int)(ease(t)*6),spread=(int)(ease(t/.55f)*12);
     /* Native-size A8 text is never scaled or shaken. */
-    DrawLine(202-spread,y+23,222-spread,y+23,gold(fade*.7f));
-    DrawLine(311+spread,y+23,331+spread,y+23,gold(fade*.7f));
-    forge_text(g,"入 神",228,y+2,34,(Color){20,12,6,(uint8_t)(fade*235)});
-    forge_text(g,"入 神",227,y,34,(Color){255,223,142,(uint8_t)(fade*255)});
+    int x=262-forge_text_width(g,"入 神",34)/2,width=forge_text_width(g,"入 神",34);
+    DrawLine(x-25-spread,y+23,x-5-spread,y+23,gold(fade*.7f));
+    DrawLine(x+width+5+spread,y+23,x+width+25+spread,y+23,gold(fade*.7f));
+    forge_text(g,"入 神",x+1,y+2,34,(Color){20,12,6,(uint8_t)(fade*235)});
+    forge_text(g,"入 神",x,y,34,(Color){255,223,142,(uint8_t)(fade*255)});
 }

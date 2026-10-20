@@ -1,8 +1,8 @@
 diff --git a/README.md b/README.md
-index aef91cf..c67441e 100644
+index aef91cf..d03850e 100644
 --- a/README.md
 +++ b/README.md
-@@ -68,3 +68,19 @@ The workspace product CLI creates them and invokes this engine's public
+@@ -68,3 +68,22 @@ The workspace product CLI creates them and invokes this engine's public
  `host/run_game.py --project PATH` simulator. The engine does not own a workspace
  creation CLI or depend on the vibe repository layout. Run `python -m unittest
  discover -s tests -v` for engine implementation tests.
@@ -18,6 +18,9 @@ index aef91cf..c67441e 100644
 +manifest-declared project-local WAV files are served. These optional fields do
 +not change Host ABI v1 or implement game logic in the browser. Restart the preview
 +server after changing browser media settings.
++
++Optional `language` metadata (`en` or `zh`) localizes the preview audio button
++without changing playback or mute state. Absent metadata retains Chinese labels.
 +
 +`Mosaico2DDrawAlphaMask` draws a borrowed A8 mask at native size, honoring the 2D
 +clip. It enables build-time glyph subsets without an RGB texture or runtime font
@@ -79,7 +82,7 @@ index 0de7ba9..3e075df 100644
  static sample_step_t sample_step(int start,int numerator,int denominator){
   int64_t scaled=(int64_t)start*numerator;
 diff --git a/host/run_game.py b/host/run_game.py
-index 1310ed2..282ed66 100644
+index 1310ed2..8e810b0 100644
 --- a/host/run_game.py
 +++ b/host/run_game.py
 @@ -129,9 +129,30 @@ def prepare_project_assets(project: Path) -> None:
@@ -165,7 +168,7 @@ index 1310ed2..282ed66 100644
  async function tick(){if(busy)return;busy=true;
   try{const res=await fetch('/api/v1/frame');const meta=JSON.parse(res.headers.get('X-Mosaico-State'));const blob=await res.blob();
 - phase=meta.phase;const old=img.src,url=URL.createObjectURL(blob);img.onload=()=>{if(old.startsWith('blob:'))URL.revokeObjectURL(old);img.onload=null};img.src=url;
-+ previewAudio.consume(meta.audio_events||[],meta.reload_generation||0,meta.audio_muted===true);phase=meta.phase;const old=img.src,url=URL.createObjectURL(blob);img.onload=()=>{if(old.startsWith('blob:'))URL.revokeObjectURL(old);img.onload=null};img.src=url;
++ previewAudio.consume(meta.audio_events||[],meta.reload_generation||0,meta.audio_muted===true,meta.language);phase=meta.phase;const old=img.src,url=URL.createObjectURL(blob);img.onload=()=>{if(old.startsWith('blob:'))URL.revokeObjectURL(old);img.onload=null};img.src=url;
   paused=meta.simulation.paused;const fields=Object.entries(meta).filter(([k])=>!['simulation','reload_error','title'].includes(k)).map(([k,v])=>`${k}=${v}`).join('  ');
   state.textContent=`${meta.title||meta.game_id||'Mosaico game'}\nLogic ${meta.simulation.logic_fps.toFixed(1)} Hz  Raster ${meta.host_render_ms.toFixed(2)} ms  PNG ${meta.host_encode_ms.toFixed(2)} ms\n${fields}`}
   finally{busy=false}}
@@ -262,16 +265,17 @@ index 55152d7..f0bd9b5 100644
      assert(CheckCollisionPointTriangle((Vector2){2, 2}, (Vector2){0, 0},
 diff --git a/host/preview_audio.js b/host/preview_audio.js
 new file mode 100644
-index 0000000..b7095f4
+index 0000000..24d8a64
 --- /dev/null
 +++ b/host/preview_audio.js
-@@ -0,0 +1,89 @@
+@@ -0,0 +1,95 @@
 +// Generic preview audio: the C module supplies sequenced audio_events; only
 +// manifest-declared WAV files are decoded. No gameplay is implemented here.
 +const previewAudio = (() => {
 +  const button = document.querySelector('#audio');
 +  let context, master, preparation, enabled = false, userMuted = false;
 +  let sourceMuted = false;
++  let english = false;
 +  let lastSequence = 0, generation = 0, played = 0;
 +  const buffers = new Map();
 +  const pending = [];
@@ -282,8 +286,12 @@ index 0000000..b7095f4
 +    active.clear();
 +  }
 +  function update() {
-+    button.textContent = sourceMuted ? '游戏已静音' : enabled ? '音效：开' : '开启音效';
-+    button.title = sourceMuted ? '在游戏内关闭静音即可恢复音效' : `已播放 ${played} 次`;
++    button.textContent = english
++      ? sourceMuted ? 'Game muted' : enabled ? 'Audio: on' : 'Enable audio'
++      : sourceMuted ? '游戏已静音' : enabled ? '音效：开' : '开启音效';
++    button.title = english
++      ? sourceMuted ? 'Unmute in the game to restore audio' : `Played ${played} times`
++      : sourceMuted ? '在游戏内关闭静音即可恢复音效' : `已播放 ${played} 次`;
 +    button.dataset.played = String(played);
 +    button.dataset.ready = String(Boolean(context && context.state === 'running'));
 +  }
@@ -323,13 +331,14 @@ index 0000000..b7095f4
 +      userMuted = false; enabled = true; master.gain.value = sourceMuted ? 0 : 0.85; update();
 +      if (!preparation) preparation = prepare();
 +      Promise.all([resumed, preparation]).then(flush).catch(() => {
-+        enabled = false; preparation = null; update(); button.textContent = '重试音效';
++        enabled = false; preparation = null; update(); button.textContent = english ? 'Retry audio' : '重试音效';
 +      });
 +    } catch (_) {
-+      enabled = false; update(); button.textContent = '音效不可用';
++      enabled = false; update(); button.textContent = english ? 'Audio unavailable' : '音效不可用';
 +    }
 +  }
-+  function consume(events, currentGeneration, muted = false) {
++  function consume(events, currentGeneration, muted = false, language = 'zh') {
++    if (english !== (language === 'en')) {english = language === 'en'; update();}
 +    if (sourceMuted !== Boolean(muted)) {
 +      sourceMuted = Boolean(muted);
 +      if (sourceMuted) stopPlaying();
@@ -357,10 +366,10 @@ index 0000000..b7095f4
 +})();
 diff --git a/tests/test_preview_audio.cjs b/tests/test_preview_audio.cjs
 new file mode 100644
-index 0000000..eba99b1
+index 0000000..d654ba9
 --- /dev/null
 +++ b/tests/test_preview_audio.cjs
-@@ -0,0 +1,33 @@
+@@ -0,0 +1,40 @@
 +const assert = require('node:assert/strict');
 +const fs = require('node:fs');
 +const vm = require('node:vm');
@@ -378,6 +387,8 @@ index 0000000..eba99b1
 +const run=code=>vm.runInContext(code,context);
 +const settle=()=>new Promise(resolve=>setImmediate(resolve));
 +(async()=>{
++  run('previewAudio.consume([],0,false,"en")');assert.equal(button.textContent,'Enable audio');
++  run('previewAudio.consume([],0,false,"zh")');assert.equal(button.textContent,'开启音效');
 +  run('previewAudio.unlock()');await settle();
 +  assert.equal(calls[0],'resume');assert.equal(button.dataset.ready,'true');
 +  run('previewAudio.consume([{seq:1,clip:"hit",volume:.8}],0)');await settle();assert.equal(sources.length,1);
@@ -393,6 +404,11 @@ index 0000000..eba99b1
 +  button.onclick();
 +  run('previewAudio.consume([],1,true);previewAudio.consume([{seq:5,clip:"hit",volume:.8}],1,false)');await settle();assert.equal(sources.length,4);
 +  button.onclick();run('previewAudio.consume([{seq:6,clip:"hit",volume:.8}],1)');await settle();assert.equal(sources.length,5);
++  run('previewAudio.consume([],1,true,"en")');assert.equal(button.textContent,'Game muted');
++  const stoppedBefore=stopped.length;
++  run('previewAudio.consume([],1,true,"zh")');assert.equal(button.textContent,'游戏已静音');
++  run('previewAudio.consume([],1,true,"en")');assert.equal(button.textContent,'Game muted');
++  assert.equal(stopped.length,stoppedBefore);assert.equal(sources.length,5);
 +})().catch(error=>{console.error(error);process.exitCode=1;});
 diff --git a/tests/test_preview_media.py b/tests/test_preview_media.py
 new file mode 100644

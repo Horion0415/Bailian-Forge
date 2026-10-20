@@ -74,7 +74,7 @@ bool forge_money_parse(forge_money_t *a,const char *text){
         forge_money_add(a,&d);
         }return true;
 }
-void forge_money_text(const forge_money_t *a,char *out,size_t cap,bool compact){
+void forge_money_text_locale(const forge_money_t *a,char *out,size_t cap,bool compact,bool english){
     if(!out||!cap)return;
     char text[FORGE_MONEY_DIGITS+1];
     int top=FORGE_MONEY_LIMBS-1;
@@ -82,13 +82,25 @@ void forge_money_text(const forge_money_t *a,char *out,size_t cap,bool compact){
     int used=snprintf(text,sizeof(text),"%lu",(unsigned long)a->v[top]);
     for(int i=top-1;i>=0;i--)used+=snprintf(text+used,sizeof(text)-(size_t)used,"%09lu",(unsigned long)a->v[i]);
     const size_t len=strlen(text);
-    if(!compact||len<=4){snprintf(out,cap,"%s",text);
+    if(!compact||len<=(english?3U:4U)){snprintf(out,cap,"%s",text);
         return;
         }
     if(len>20){snprintf(out,cap,"%c.%c%ce%u",text[0],text[1],text[2],(unsigned)len-1);
         return;
         }
-    const char *unit=len>16?"京":len>12?"万亿":len>8?"亿":"万";
-    const unsigned shift=len>16?16:len>12?12:len>8?8:4,whole=(unsigned)len-shift;
+    const char *unit;
+    unsigned shift;
+    if(english){
+        static const char *const units[]={"","K","M","B","T","Qa","Qi"};
+        unsigned group=((unsigned)len-1)/3;
+        shift=group*3;unit=units[group];
+    }else{unit=len>16?"京":len>12?"万亿":len>8?"亿":"万";
+        shift=len>16?16:len>12?12:len>8?8:4;
+    }
+    const unsigned whole=(unsigned)len-shift;
     snprintf(out,cap,"%.*s.%c%c%s",whole,text,text[whole],text[whole+1],unit);
+}
+void forge_money_text(const forge_money_t *a,char *out,size_t cap,bool compact)
+{
+    forge_money_text_locale(a,out,cap,compact,false);
 }

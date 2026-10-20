@@ -47,7 +47,7 @@ void forge_particles(game_handle_t g,int kind)
     fx->family=old?old->family:blade?blade->family:0;
     fx->old_level=old?old->level:0;fx->new_level=blade?blade->level:0;
     forge_money_t value=forge_value(&g->state,blade);
-    forge_money_text(&value,fx->value,sizeof(fx->value),true);
+    fx->value=value;
     bool inside=(blade&&blade->frenzy_ms>0)||(old&&old->frenzy_ms>0);
     forge_frenzy_strike(g,inside,blade&&blade->frenzy_ms>0&&(!old||old->frenzy_ms<=0));
     fx->heat=1;
@@ -221,12 +221,13 @@ void forge_fx_labels(game_handle_t g)
         static const char *const labels[]={"破 碎","损 伤","未 变","成 功","大 成 功","","精 锻"};
         Color c=fx->result==RESULT_BREAK||fx->result==RESULT_DAMAGE?(Color){255,139,100,255}:(Color){255,218,136,255};
         int size=fx->result==RESULT_GREAT?30:24;
-        int x=fx->result==RESULT_GREAT?190:214,y=192-(int)(smooth(p)*28);
+        int x=262-forge_text_width(g,labels[fx->result],size)/2,y=192-(int)(smooth(p)*28);
         forge_text(g,labels[fx->result],x+1,y+2,size,alpha((Color){18,12,8,255},fade*.9f));
         forge_text(g,labels[fx->result],x,y,size,alpha(c,fade));
         if(fx->result==RESULT_SUCCESS||fx->result==RESULT_GREAT){
-            snprintf(g->text_buffer,sizeof(g->text_buffer),"+%u   %s G",fx->new_level,fx->value);
-            forge_text(g,g->text_buffer,211,y+35,18,alpha((Color){247,229,195,255},fade));
+            char value[32];forge_money_text_locale(&fx->value,value,sizeof(value),true,g->language==GAME_LANGUAGE_EN);
+            snprintf(g->text_buffer,sizeof(g->text_buffer),"+%u   %s G",fx->new_level,value);
+            forge_text_center(g,g->text_buffer,150,y+35,240,18,alpha((Color){247,229,195,255},fade));
         }
     }
     forge_frenzy_label(g);

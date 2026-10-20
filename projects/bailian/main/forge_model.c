@@ -19,7 +19,7 @@ uint32_t forge_random(forge_state_t *s){uint32_t t=(s->rng+=UINT32_C(0x6d2b79f5)
     }
 static bool chance(forge_state_t *s,unsigned per100){return forge_random(s)%100U<per100;
     }
-void forge_notice(game_handle_t g,const char *text){snprintf(g->notice,sizeof(g->notice),"%s",text);
+void forge_notice(game_handle_t g,const char *text){snprintf(g->notice,sizeof(g->notice),"%s",forge_tr(g,text));
     g->notice_ms=4500;
     }
 void forge_changed(game_handle_t g,bool invalidate){g->state.revision++;
@@ -136,7 +136,7 @@ static void acquire(game_handle_t g,int id){
     if(id==R_PEARL)add_ticket(s,1,3);
     if(id==R_SEED)add_ticket(s,2,6);
     if(id==R_ORACLE)add_ticket(s,4,4);
-    snprintf(g->notice,sizeof(g->notice),"获得：%s",forge_relics[id].name);
+    snprintf(g->notice,sizeof(g->notice),forge_tr(g,"获得：%s"),forge_tr(g,forge_relics[id].name));
     g->notice_ms=4000;
     g->feedback=FB_SELECT;
 }
@@ -718,7 +718,7 @@ bool forge_strike(game_handle_t g,int forced){
             s->frenzy_fraction[index]=s->frenzy_fraction[s->active];
             }}
     static const char *const words[5]={"破碎","损伤","不变","成功","大成功"};
-    snprintf(g->notice,sizeof(g->notice),"%s%s  强化 +%u",inside?"入神 · ":"",words[result],b->level);
+    snprintf(g->notice,sizeof(g->notice),forge_tr(g,"%s%s  强化 +%u"),inside?forge_tr(g,"入神 · "):"",forge_tr(g,words[result]),b->level);
     g->notice_ms=1800;
     g->feedback=result==RESULT_GREAT?FB_GREAT:result==RESULT_DAMAGE?FB_DAMAGE:FB_HIT;
     forge_particles(g,(int)result);
@@ -745,7 +745,7 @@ static void next_day(game_handle_t g,bool paid,unsigned best){
     g->pending_strike=false;
     g->heat_ms=0;
     g->cooldown_ms=0;
-    snprintf(g->notice,sizeof(g->notice),"第%u日开炉 · 三把新剑已送达",s->day);
+    snprintf(g->notice,sizeof(g->notice),forge_tr(g,"第%u日开炉 · 三把新剑已送达"),s->day);
     g->notice_ms=4000;
 }
 bool forge_settle(game_handle_t g,bool accept){

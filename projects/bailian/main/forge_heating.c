@@ -128,5 +128,5 @@ bool forge_heat_draw_footer(game_handle_t g,const forge_heat_view_t *v)
     else if(v->phase==HEAT_RETURN)text="火候已足，正在移回铁砧";
     else if(v->phase==HEAT_READY)text="火候正好 · 点击铁砧落锤";
     if(!text)return false;
-    forge_text(g,text,18,386,18,(Color){231,211,177,255});return true;
+    forge_text_fit(g,text,18,386,444,18,(Color){231,211,177,255});return true;
 }

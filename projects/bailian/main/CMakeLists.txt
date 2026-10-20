@@ -1,6 +1,6 @@
 idf_component_register(
     SRCS "forge_device.c" "forge_screen_mirror.c" "game.c" "forge_money.c"
-         "forge_data.c" "forge_model.c" "forge_input.c" "forge_view.c" "forge_effects.c" "forge_heating.c" "forge_frenzy.c" "forge_tribute.c" "forge_sword.c" "forge_swing.c"
+         "forge_data.c" "forge_i18n.c" "forge_model.c" "forge_input.c" "forge_view.c" "forge_effects.c" "forge_heating.c" "forge_frenzy.c" "forge_tribute.c" "forge_sword.c" "forge_swing.c"
     INCLUDE_DIRS "."
     REQUIRES mosaico_game_app mosaico_raylib_fast mosaico_game_2d mosaico_game_assets
              mosaico_game_audio esp-gsp nvs_flash esp_timer esp_hw_support)

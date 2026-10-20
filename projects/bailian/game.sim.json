@@ -1,19 +1,24 @@
 {
   "schema": "mosaico-game-sim/v1",
-  "display": {"image_rendering": "auto"},
-  "audio": {"clips": {
-    "hit": "assets_src/hit.wav",
-    "great": "assets_src/great.wav",
-    "damage": "assets_src/damage.wav",
-    "break": "assets_src/break.wav",
-    "bell": "assets_src/bell.wav",
-    "select": "assets_src/select.wav",
-    "heat": "assets_src/heat.wav",
-    "frenzy": "assets_src/frenzy.wav"
-  }},
+  "display": {
+    "image_rendering": "auto"
+  },
+  "audio": {
+    "clips": {
+      "hit": "assets_src/hit.wav",
+      "great": "assets_src/great.wav",
+      "damage": "assets_src/damage.wav",
+      "break": "assets_src/break.wav",
+      "bell": "assets_src/bell.wav",
+      "select": "assets_src/select.wav",
+      "heat": "assets_src/heat.wav",
+      "frenzy": "assets_src/frenzy.wav"
+    }
+  },
   "sources": [
     "main/game_module.c",
     "main/game.c",
+    "main/forge_i18n.c",
     "main/forge_money.c",
     "main/forge_data.c",
     "main/forge_model.c",
