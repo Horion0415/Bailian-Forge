@@ -45,7 +45,7 @@ static device_t s_device;
 typedef struct { uint32_t magic,version,size,sequence,crc,reserved; } save_header_t;
 #define SAVE_MAGIC UINT32_C(0x464f5247)
 #define EMBEDDED(symbol) extern const uint8_t _binary_bailian_asset_##symbol##_start[],_binary_bailian_asset_##symbol##_end[]
-EMBEDDED(room);EMBEDDED(hammer);EMBEDDED(swords);EMBEDDED(relics);EMBEDDED(font);
+EMBEDDED(room);EMBEDDED(hammer);EMBEDDED(swords);EMBEDDED(relics);EMBEDDED(dragon);EMBEDDED(font);
 EMBEDDED(hit);EMBEDDED(great);EMBEDDED(damage);EMBEDDED(break);EMBEDDED(bell);EMBEDDED(select);EMBEDDED(heat);EMBEDDED(frenzy);
 static uint32_t crc32(const void *data,size_t size)
 {
@@ -143,7 +143,7 @@ static void update_snapshot(void)
 static esp_err_t before_display(void)
 {
 #define REGISTER(name,suffix) ESP_RETURN_ON_ERROR(mosaico_game_asset_register_memory(#name suffix,_binary_bailian_asset_##name##_start,(size_t)(_binary_bailian_asset_##name##_end-_binary_bailian_asset_##name##_start)),TAG,"asset " #name)
-    REGISTER(room,".atlas");REGISTER(hammer,".atlas");REGISTER(swords,".atlas");REGISTER(relics,".atlas");REGISTER(font,".mask");
+    REGISTER(room,".atlas");REGISTER(hammer,".atlas");REGISTER(swords,".atlas");REGISTER(relics,".atlas");REGISTER(dragon,".atlas");REGISTER(font,".mask");
     REGISTER(hit,".sound");REGISTER(great,".sound");REGISTER(damage,".sound");REGISTER(break,".sound");REGISTER(bell,".sound");REGISTER(select,".sound");REGISTER(heat,".sound");REGISTER(frenzy,".sound");
 #undef REGISTER
     return ESP_OK;

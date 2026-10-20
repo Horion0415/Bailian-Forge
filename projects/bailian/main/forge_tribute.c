@@ -60,29 +60,37 @@ void forge_tribute_pointer(game_handle_t g,int x,int y)
 }
 static void dragon(game_handle_t g,float opacity)
 {
-    forge_tribute_fx_t *t=&g->tribute;Color dark=tint((Color){11,10,9,255},opacity*.97f),edge=tint(accent(t),opacity*.8f);
-    float breath=sinf(t->age_ms*.006f)*2;
-    /* A bounded shadow silhouette: spread wings, long horns, muzzle and eyes. */
+    const MosaicoSpriteFrame *frame=MosaicoAtlasGetFrame(g->dragon,mosaico_game_asset_id("dragon"));
+    if(!frame)return;
+    forge_tribute_fx_t *t=&g->tribute;
+    float response=ease(((float)t->age_ms-FORGE_TRIBUTE_RESPONSE_MS)/220);
+    float reaction=sinf(clamp01(((float)t->age_ms-FORGE_TRIBUTE_RESPONSE_MS)/650)*3.1415927f);
+    float breath=sinf(t->age_ms*.0035f);
+    float scale=1+breath*.008f+(t->paid?0:.028f*reaction);
+    float width=416*scale,height=178*scale;
+    float x=240-width*.5f+(t->paid?0:sinf(t->age_ms*.035f)*reaction*1.6f);
+    float y=111+breath*1.4f+(t->paid?3:-2)*reaction+(1-opacity)*-6;
+    Color light={255,(uint8_t)(255-(t->paid?0:43*response)),(uint8_t)(255-(t->paid?0:65*response)),255};
+    DrawTexturePro(g->dragon.texture,frame->source,(Rectangle){x,y,width,height},(Vector2){0,0},0,tint(light,opacity));
+    /* Eye positions are normalized to the authored sprite, so highlights follow
+     * its breathing and response motion without washing out the facial scales. */
+    float eyes=response*opacity;
     for(int side=-1;side<=1;side+=2){
-        float x=240,sy=139+breath;
-        DrawTriangle((Vector2){x+side*20,sy+23},(Vector2){x+side*158,sy-28},(Vector2){x+side*100,sy+54},dark);
-        DrawTriangle((Vector2){x+side*37,sy+26},(Vector2){x+side*100,sy+54},(Vector2){x+side*65,sy+12},dark);
-        DrawTriangle((Vector2){x+side*21,sy+9},(Vector2){x+side*52,sy-27},(Vector2){x+side*32,sy+35},dark);
-        DrawLine((int)x+side*34,(int)sy+2,(int)x+side*52,(int)sy-27,tint(accent(t),opacity*.4f));
-        DrawLine((int)x+side*52,(int)sy-27,(int)x+side*44,(int)sy-12,edge);
-        DrawLine((int)x+side*56,(int)sy+11,(int)x+side*133,(int)sy-14,tint(accent(t),opacity*.3f));
+        int ex=(int)(x+width*(.5f+side*.044f)),ey=(int)(y+height*.457f);
+        Color c=accent(t);
+        DrawEllipse(ex,ey,8,4,tint(c,eyes*.10f));
+        DrawEllipse(ex,ey,4,2,tint(c,eyes*.32f));
+        DrawLineEx((Vector2){ex-side*2,ey-1},(Vector2){ex+side*2,ey-2},2,tint(c,eyes));
+        DrawPixel(ex,ey-1,tint((Color){255,244,211,255},eyes));
     }
-    DrawTriangle((Vector2){195,141+breath},(Vector2){285,141+breath},(Vector2){240,212+breath},dark);
-    DrawTriangle((Vector2){215,137+breath},(Vector2){265,137+breath},(Vector2){240,116+breath},dark);
-    float eyes=ease(((float)t->age_ms-FORGE_TRIBUTE_RESPONSE_MS)/220)*opacity;
-    for(int side=-1;side<=1;side+=2){
-        int x=240+side*23,y=159+(int)breath;
-        glow(g,x,y,tint(accent(t),eyes*.8f));
-        DrawLineEx((Vector2){x-side*8,y-3},(Vector2){x+side*5,y+1},3,tint(accent(t),eyes));
-        DrawPixel(x,y,tint((Color){255,242,189,255},eyes));
+    /* A few deterministic embers trail from the nostrils on an angry exhale.
+     * Presentation never consumes the gameplay RNG or allocates per frame. */
+    if(!t->paid&&reaction>0)for(int side=-1;side<=1;side+=2)for(int i=0;i<4;i++){
+        float p=fmodf(t->age_ms*.002f+i*.23f,1);
+        int ex=(int)(x+width*(.5f+side*.014f)+side*p*18);
+        int ey=(int)(y+height*.65f+p*21);
+        DrawCircle(ex,ey,1,tint(accent(t),(1-p)*reaction*.85f));
     }
-    DrawLine(231,184+(int)breath,240,188+(int)breath,edge);
-    DrawLine(240,188+(int)breath,249,184+(int)breath,edge);
 }
 static void altar(game_handle_t g)
 {

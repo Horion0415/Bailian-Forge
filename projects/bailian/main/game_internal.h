@@ -73,7 +73,7 @@ struct game_t {
     forge_tribute_fx_t tribute;
     forge_sword_shape_t shape;
     forge_swing_t swing;
-    MosaicoAtlas room,hammer,swords,relic_atlas;
+    MosaicoAtlas room,hammer,swords,relic_atlas,dragon;
     mosaico_asset_view_t font;
     uint8_t *save_buffer;
     bool audio_muted;

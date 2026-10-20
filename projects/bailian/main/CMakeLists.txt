@@ -19,7 +19,7 @@ add_custom_target(forge_assets
     DEPENDS ${FORGE_ASSET_INPUTS})
 add_dependencies(${COMPONENT_LIB} forge_assets)
 target_include_directories(${COMPONENT_LIB} PRIVATE "${FORGE_ASSETS}")
-foreach(name room hammer swords relics)
+foreach(name room hammer swords relics dragon)
     target_add_binary_data(${COMPONENT_LIB} "${FORGE_ASSETS}/${name}.atlas" BINARY
         RENAME_TO "bailian_asset_${name}" DEPENDS forge_assets)
 endforeach()

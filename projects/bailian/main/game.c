@@ -32,6 +32,7 @@ void game_delete(game_handle_t g)
         UnloadMosaicoAtlas(g->hammer);
         UnloadMosaicoAtlas(g->swords);
         UnloadMosaicoAtlas(g->relic_atlas);
+        UnloadMosaicoAtlas(g->dragon);
         }
     free(g->undo);
     free(g->save_buffer);
@@ -45,12 +46,14 @@ bool game_load_assets(game_handle_t g)
     g->hammer=LoadMosaicoAtlas("hammer.atlas");
     g->swords=LoadMosaicoAtlas("swords.atlas");
     g->relic_atlas=LoadMosaicoAtlas("relics.atlas");
+    g->dragon=LoadMosaicoAtlas("dragon.atlas");
     bool font_ready=mosaico_game_asset_open("font.mask",&g->font)==ESP_OK&&g->font.size==FORGE_FONT_BYTES;
-    g->assets_loaded=g->room.texture.id&&g->hammer.texture.id&&g->swords.texture.id&&g->relic_atlas.texture.id&&font_ready;
+    g->assets_loaded=g->room.texture.id&&g->hammer.texture.id&&g->swords.texture.id&&g->relic_atlas.texture.id&&g->dragon.texture.id&&font_ready;
     if(!g->assets_loaded){UnloadMosaicoAtlas(g->room);
         UnloadMosaicoAtlas(g->hammer);
         UnloadMosaicoAtlas(g->swords);
         UnloadMosaicoAtlas(g->relic_atlas);
+        UnloadMosaicoAtlas(g->dragon);
         }
     return g->assets_loaded;
 }

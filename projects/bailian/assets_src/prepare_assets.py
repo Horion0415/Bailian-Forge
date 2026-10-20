@@ -41,6 +41,9 @@ room=Image.open(ROOT/'assets_src/forge-room.png').convert('RGB').resize((480,480
 atlas('room.atlas',room,[('room',0,0,480,480)],opaque=True)
 hammer=Image.open(ROOT/'assets_src/hammer.png').convert('RGBA').resize((224,224),resample)
 atlas('hammer.atlas',hammer,[('hammer',0,0,224,224)],binary=True)
+# One bounded, smooth-alpha sprite; the tribute renderer animates it directly.
+dragon=Image.open(ROOT/'assets_src/tribute-dragon.png').convert('RGBA').resize((416,178),resample)
+atlas('dragon.atlas',dragon,[('dragon',0,0,416,178)])
 
 # Regular sprite-sheet cells are authored separately by ImageGen. Packing and
 # quantization here do not synthesize alternate artwork or render game scenes.
