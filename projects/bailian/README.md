@@ -33,9 +33,11 @@ duration relics. Effects use a separate random stream.
 
 assets_src/prepare_assets.py generates RGB565 atlases, audio and 15 native-size
 A8 font subsets. Font outlines are required only at build time. The device does
-not need Python, FreeType or complete font files. The app is approximately
-13.08 MiB and uses the large OTA partition, preserving the retained Vibe Mode prefix.
-The scoped GCC 16.1 SLP workaround in CMake preserves -O2 for the game.
+not need Python, FreeType or complete font files. Assets are embedded in the application, which uses the large OTA partition
+while preserving the retained Vibe Mode prefix.
+For ESP32-S31 with GCC 16.1, SLP is disabled because it crashes across game,
+network and DMA sources in fresh builds. Other -O2 passes are retained; the
+workaround does not apply to other compiler versions or targets.
 
 Rule JSON and generated C tables are included. The optional reference importer
 accepts an explicitly supplied independently implemented bailian.cjs; normal
@@ -47,7 +49,8 @@ The independent forge_save partition uses two versioned CRC-checked slots.
 Progress commits after about 1.8 seconds without gameplay input. Power loss
 before a commit can lose recent actions. Version 0.2.x uses a 24032-byte payload
 and migrates the 23544-byte 0.1.0 payload; older firmware cannot read newer saves.
-The mute preference is independent of undo, saved gameplay and new games.
+Mute and language preferences are independent of undo, saved gameplay and new games.
+The language key is separate from the unchanged gameplay payload.
 
 ## Tests
 
@@ -59,3 +62,11 @@ Demonstration GIFs from those fixtures are illustrative replays.
 
 Host checks do not establish physical speaker loudness, touch feel or device
 frame rate. See [asset and rule sources](ASSETS.md) for provenance.
+
+## Translation maintenance
+
+forge_i18n.c stores UTF-8-sorted Chinese/English pairs with checked printf placeholders.
+The same renderer measures and wraps CJK characters and English words at native font sizes.
+Run tests/replay_i18n.py after editing text; it checks translation coverage, all relic/item
+details, native text bounds, language controls and save/RNG isolation. Snapshot currency
+fields keep their existing machine-facing format; only display amounts are localized.

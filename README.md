@@ -3,7 +3,7 @@
 [简体中文](README_CN.md)
 
 A touch-controlled sword-forging game for ESP-Mosaico. Forge evolving blades,
-collect relics, and survive 21 days of tribute. The current interface is Simplified Chinese.
+collect relics, and survive 21 days of tribute. Switch between Simplified Chinese and English from the top bar or pause menu.
 
 ![ESP-Mosaico gameplay](projects/bailian/publish/cover.png)
 
@@ -11,7 +11,7 @@ collect relics, and survive 21 days of tribute. The current interface is Simplif
 - 10 sword families, 50 illustrated forms and upgrades up to +99.
 - 94 classic relics, 7 merchant consumables and an extended post-victory contract.
 - Sparks, impact, frenzy and tribute animations, audio and haptic feedback.
-- A persistent device mute setting and a native C browser simulator.
+- Independent device language/mute preferences and a native C browser simulator.
 
 Inspired by ForgeTax, with independently implemented rules, generated artwork and
 project-specific balance. This is an adaptation with its own implementation.
@@ -36,6 +36,16 @@ python3 mosaico.py game sim --project projects/bailian --port 8476
 Open <http://127.0.0.1:8476/>. Use mouse/touch to play, F or Ctrl to heat/hammer,
 and P to pause. Audio starts after a gesture; both the game and preview toolbar
 provide mute controls. The simulator requires neither a board nor ESP-IDF.
+
+## Language
+
+Use **EN / ZH** in the top bar, or the language button beside audio in the pause
+menu. Switching is immediate, including during tribute. Relics, items, rules,
+notices and effects are translated; English amounts use K/M/B/T/Qa/Qi.
+The device stores the preference separately from gameplay saves. Undo, new runs
+and save loading keep it. Browser preferences last for the simulator process.
+
+![English UI in the native replay test scenario](projects/bailian/publish/english.png)
 
 ## Build and install
 
@@ -65,6 +75,7 @@ python3 tools/bootstrap.py --check
 python3 projects/bailian/tests/run_model_tests.py
 python3 projects/bailian/tests/replay_gameplay.py
 python3 projects/bailian/tests/replay_audio.py
+python3 projects/bailian/tests/replay_i18n.py
 ```
 
 Tests execute the shared native C model and renderer. Build/test output,
