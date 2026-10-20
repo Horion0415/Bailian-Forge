@@ -1,0 +1,37 @@
+{
+  "schema": "mosaico-ideas/project-upload/v1",
+  "project": {
+    "title": "Bailian Forge · 百炼",
+    "categories": [
+      "display"
+    ],
+    "boards": [],
+    "tags": [
+      "game",
+      "forging",
+      "touch",
+      "esp32s31"
+    ],
+    "license": "Apache-2.0; Noto fonts: SIL OFL-1.1; dependency licenses apply",
+    "external_links": [
+      {
+        "label": "Source code",
+        "url": "https://github.com/Horion0415/Bailian-Forge",
+        "platform": "github"
+      }
+    ]
+  },
+  "content": {
+    "readme": "PUBLISH.md",
+    "covers": [
+      "publish/cover.png"
+    ],
+    "resources": [
+      "publish/sword-evolution.gif"
+    ],
+    "attachments": []
+  },
+  "release": {
+    "changelog": "0.2.1: independent persistent mute preference; includes balanced frenzy, evolving sword forms and forging/tribute effects."
+  }
+}
