@@ -255,6 +255,7 @@ static void forge_scene(game_handle_t g)
 {
     forge_state_t *s=&g->state;
     forge_blade_t *b=forge_active(g);
+    bool rewind_ready=forge_can_rewind(g);
     int dx=0,dy=0;forge_fx_camera(g,&dx,&dy);
     forge_heat_view_t heat;forge_heat_read(g,&heat);
     BeginScissorMode(0,103,480,234);
@@ -289,12 +290,13 @@ static void forge_scene(game_handle_t g)
         forge_heat_draw_hud(g,&heat);
     }else if(!forge_fx_break_visible(g)){
         frame(93,156,292,73,false);
-        forge_text_center(g,"铁砧空着",101,166,276,28,FORGE_CREAM);
-        forge_text_center(g,"到剑架选择一把剑",101,202,276,20,FORGE_MUTED);
+        forge_text_center(g,rewind_ready?"碎刀仍可回溯":"铁砧空着",101,166,276,28,FORGE_CREAM);
+        forge_text_center(g,rewind_ready?"点击下方发条回溯":"到剑架选择一把剑",101,202,276,20,FORGE_MUTED);
     }
     forge_fx_labels(g);
     button(g,12,339,210,36,g->heat_ms?"取出放入贡台":"放入贡台",false);
-    button(g,258,339,210,36,"发条回溯",false);
+    snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"发条回溯 ×%u"),s->items[ITEM_CLOCK]);
+    button(g,258,339,210,36,g->text_buffer,rewind_ready);
     if(forge_heat_draw_footer(g,&heat))return;
     if(s->scale||s->chalk||s->powder){
         snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"已准备：%s%s%s"),s->scale?forge_tr(g,"龙鳞 "):"",s->chalk?forge_tr(g,"粉笔 "):"",s->powder?forge_tr(g,"火药"):"");

@@ -29,7 +29,10 @@ void forge_swing_request(game_handle_t g)
 {
     if(g->paused||g->modal||g->tribute.active||g->state.phase!=PHASE_PLAY||g->screen!=SCREEN_FORGE)return;
     forge_blade_t *b=forge_active(g);
-    if(!b){g->screen=SCREEN_RACK;forge_notice(g,"先在剑架选择一把剑");return;}
+    if(!b){
+        if(forge_can_rewind(g)){forge_notice(g,"碎刀仍可回溯，点击下方发条回溯");return;}
+        g->screen=SCREEN_RACK;forge_notice(g,"先在剑架选择一把剑");return;
+    }
     if(g->heat_ms)return;
     if(b->level>=99){forge_notice(g,"已到+99，可将名刀留存或进贡");return;}
     if(g->cooldown_ms||g->pending_strike){

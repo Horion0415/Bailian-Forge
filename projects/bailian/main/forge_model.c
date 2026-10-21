@@ -480,8 +480,15 @@ bool forge_use_item(game_handle_t g,int item){
     forge_notice(g,"物品效果已准备");
     return true;
 }
+bool forge_can_rewind(game_handle_t g){
+    return g&&g->state.phase==PHASE_PLAY&&!g->tribute.active&&g->undo_valid&&g->state.items[ITEM_CLOCK];
+}
 bool forge_rewind(game_handle_t g){
-    if(g->state.phase!=PHASE_PLAY||g->tribute.active||!g->undo_valid||!g->state.items[ITEM_CLOCK]){forge_notice(g,"需要悔恨发条，且尚未离开上一锤的铁砧");
+    if(!g)return false;
+    if(!g->state.items[ITEM_CLOCK]){forge_notice(g,"背包中没有悔恨发条");
+        return false;
+        }
+    if(!forge_can_rewind(g)){forge_notice(g,"没有可回溯的上一锤；换剑或离开铁砧后失效");
         return false;
         }
     uint16_t left=g->state.items[ITEM_CLOCK]-1;

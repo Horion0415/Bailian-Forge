@@ -128,11 +128,12 @@ void forge_pointer(game_handle_t g,int x,int y)
         }
     if(y>=414){unsigned tab=(unsigned)x/120;
         if(tab==g->screen)return;
+        bool bag_return=g->screen==SCREEN_ITEMS&&tab==SCREEN_FORGE;
         forge_swing_cancel(g,tab!=g->screen);
         g->screen=(uint8_t)tab;
         g->page=0;
         g->selected=255;
-        g->undo_valid=false;
+        if(!bag_return)g->undo_valid=false;
         return;
         }
     if(y<52){if(x<90){game_set_paused(g,true);

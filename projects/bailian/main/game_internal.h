@@ -105,6 +105,7 @@ forge_money_t forge_reroll_price(const forge_state_t *s);
 forge_money_t forge_merchant_price(const forge_state_t *s,unsigned slot);
 bool forge_buy_merchant(game_handle_t g,unsigned slot);
 bool forge_use_item(game_handle_t g,int item);
+bool forge_can_rewind(game_handle_t g);
 bool forge_rewind(game_handle_t g);
 bool forge_settle(game_handle_t g,bool accept_short);
 bool forge_continue(game_handle_t g);

@@ -168,7 +168,8 @@ int game_write_json(game_handle_t g,char *out,size_t capacity)
     if(n<1||(size_t)n>=capacity)return-1;
     size_t used=(size_t)n-1;
     forge_blade_t *b=forge_active(g);
-    n=snprintf(out+used,capacity-used,",\"language\":\"%s\",\"audio_muted\":%s,\"fx\":{\"active\":%s,\"result\":%u,\"age_ms\":%u,\"particles\":%u,\"frenzy_pulse_ms\":%u,\"frenzy_age_ms\":%u,\"frenzy_total_ms\":%u,\"frenzy_hit\":%s,\"heat_ms\":%u,\"heat_stage\":%u,\"heat_ready_ms\":%u,\"heated\":%s,\"tribute_stage\":%u,\"tribute_age_ms\":%u,\"tribute_paid\":%s,\"shape_stage\":%u,\"shape_morph_ms\":%u,\"swing_ms\":%u,\"contact_ms\":%u,\"swing_queued\":%s,\"swing_pending\":%s}}",
+    n=snprintf(out+used,capacity-used,",\"clocks\":%u,\"can_rewind\":%s,\"language\":\"%s\",\"audio_muted\":%s,\"fx\":{\"active\":%s,\"result\":%u,\"age_ms\":%u,\"particles\":%u,\"frenzy_pulse_ms\":%u,\"frenzy_age_ms\":%u,\"frenzy_total_ms\":%u,\"frenzy_hit\":%s,\"heat_ms\":%u,\"heat_stage\":%u,\"heat_ready_ms\":%u,\"heated\":%s,\"tribute_stage\":%u,\"tribute_age_ms\":%u,\"tribute_paid\":%s,\"shape_stage\":%u,\"shape_morph_ms\":%u,\"swing_ms\":%u,\"contact_ms\":%u,\"swing_queued\":%s,\"swing_pending\":%s}}",
+        g->state.items[ITEM_CLOCK],forge_can_rewind(g)?"true":"false",
         game_get_language(g)==GAME_LANGUAGE_EN?"en":"zh",game_is_muted(g)?"true":"false",g->fx.active?"true":"false",g->fx.result,g->fx.age_ms,forge_fx_particle_count(g),g->fx.frenzy_pulse_ms,
         g->fx.frenzy.age_ms,g->fx.frenzy.total_ms,g->fx.frenzy.hit?"true":"false",
         g->heat_ms,forge_heat_phase(g),g->heating.ready_ms,b&&b->heated?"true":"false",
