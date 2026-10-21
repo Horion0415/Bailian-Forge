@@ -87,9 +87,14 @@ impact particles and the previous sword transition, without replaying frenzy ent
 
 Changing blades, offering/trading, shopping/rerolling, using another item, evolving,
 switching to Rack/Relics/Tribute or loading a save invalidates the opportunity. Opening the item
-bag to use the clock is allowed. Re-selecting the current Forge tab, pausing, and
+bag, inspecting/cancelling an item and returning to Forge are allowed. Re-selecting the current Forge tab, pausing, and
 changing language/audio preferences preserve it. A failed rewind leaves a swing
 in progress intact. Gameplay save size remains unchanged.
 
+After a shatter, extra anvil taps stay on Forge while a clock can restore the
+blade. The button shows the remaining count and highlights a valid opportunity;
+the empty anvil points to it. Device/Host JSON includes clocks and can_rewind.
+
 `tests/replay_rewind.py` covers all five results, +99, shatter side effects,
-clone/backlog rollback, item-bag input, invalidation and controller/visual cleanup.
+clone/backlog rollback, item-bag roundtrips after shattering, repeated empty-anvil
+taps, invalidation and controller/visual cleanup.

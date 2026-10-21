@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3
+
+- Preserve rewind after inspecting/cancelling an item and returning to Forge.
+- Keep extra taps on a shattered blade at the anvil when a clock can restore it.
+- Show clock quantity, highlight an available rewind and clarify missing-item/snapshot notices.
+- Cover both shatter touch paths and preserve invalidation after actual gameplay changes.
+
 ## 0.3.2
 
 - Replace the tribute silhouette with a detailed transparent dragon sprite.
