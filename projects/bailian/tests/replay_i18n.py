@@ -96,7 +96,8 @@ with tempfile.TemporaryDirectory(prefix="forge-i18n-") as scratch:
                   ("trade", 10, 5), ("discard", 10, 6), ("tribute-rise", 11, 0),
                   ("tribute-dragon", 11, 900), ("tribute-reward", 11, 1700),
                   ("heating", 12, 0), ("frenzy", 13, 0), ("clear", 14, 2),
-                  ("lost", 14, 3), ("owned", 15, 0), ("large-values", 16, 0)]
+                  ("lost", 14, 3), ("owned", 15, 0), ("large-values", 16, 0),
+                  ("rewind-shatter", 18, 0), ("rewind-empty", 18, 1)]
         captures = []
         for name, scene, detail in scenes:
             api.i18n_test_scene(scene, detail)

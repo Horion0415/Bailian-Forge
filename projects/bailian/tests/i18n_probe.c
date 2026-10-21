@@ -79,6 +79,9 @@ void i18n_test_scene(unsigned scene,unsigned detail)
     case 17:
         g->modal=MODAL_OFFER;g->detail_offer=0;s->merchant_count=1;
         s->merchant[0]=(forge_offer_t){.kind=1,.family=(uint8_t)detail,.level=20,.stock=1};break;
+    case 18:
+        if(detail)s->items[ITEM_CLOCK]=0;
+        assert(forge_strike(g,RESULT_BREAK));game_update_elapsed(g,2000);g->notice_ms=0;break;
     default:break;
     }
 }

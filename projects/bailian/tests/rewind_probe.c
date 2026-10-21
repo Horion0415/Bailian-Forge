@@ -65,6 +65,19 @@ int rewind_test_report(char *out,size_t capacity)
     tap(g,200,180);assert(g->modal==MODAL_ITEM&&g->detail_item==ITEM_CLOCK);tap(g,330,340);
     bool bag=g->state.hits==0&&g->state.items[ITEM_CLOCK]==1&&g->screen==SCREEN_FORGE;
 
+    fresh(g);forge_active(g)->level=8;assert(forge_strike(g,RESULT_BREAK));
+    tap(g,440,20);tap(g,200,180);tap(g,100,340);tap(g,60,450);tap(g,350,355);
+    bool bag_return=forge_active(g)&&forge_active(g)->level==8&&g->state.items[ITEM_CLOCK]==1&&g->state.breaks==0;
+
+    bool rapid_break=true;
+    for(unsigned delay=0;delay<=2000;delay+=2000){
+        fresh(g);forge_active(g)->level=8;assert(forge_strike(g,RESULT_BREAK));game_update_elapsed(g,delay);
+        for(unsigned i=0;i<8;i++)tap(g,260,250);
+        bool stayed=g->screen==SCREEN_FORGE&&g->undo_valid&&g->state.items[ITEM_CLOCK]==2;
+        tap(g,350,355);
+        rapid_break=rapid_break&&stayed&&forge_active(g)&&forge_active(g)->level==8&&g->state.items[ITEM_CLOCK]==1&&g->state.breaks==0;
+    }
+
     fresh(g);forge_active(g)->charge=10;forge_swing_request(g);game_update_elapsed(g,42);
     assert(g->undo_valid&&g->swing.frenzy_sound);assert(forge_rewind(g));
     bool entry_clear=game_take_feedback(g)==FB_SELECT&&game_take_feedback(g)==FB_NONE;
@@ -92,7 +105,7 @@ int rewind_test_report(char *out,size_t capacity)
     bool backlog=g->state.backlog==1&&g->state.pending_levels[7]==1&&forge_active(g)->id==1&&g->state.next_id==97;
 
     unsigned invalidated=0;
-    for(unsigned action=0;action<10;action++){
+    for(unsigned action=0;action<12;action++){
         fresh(g);forge_active(g)->level=6;assert(forge_strike(g,RESULT_HOLD));
         if(action==0)assert(forge_select(g,1));
         if(action==1)assert(forge_move(g,g->state.active,true));
@@ -106,13 +119,15 @@ int rewind_test_report(char *out,size_t capacity)
         if(action==8){size_t size=game_save_size();void *save=malloc(size);assert(save);
             assert(game_save_write(g,save,size)&&game_save_read(g,save,size));free(save);}
         if(action==9)tap(g,300,450);
+        if(action==10){g->state.items[ITEM_CHALK]=1;tap(g,440,20);assert(forge_use_item(g,ITEM_CHALK));tap(g,60,450);}
+        if(action==11){tap(g,180,450);tap(g,440,20);tap(g,60,450);}
         uint16_t clocks=g->state.items[ITEM_CLOCK];
         assert(!forge_rewind(g)&&g->state.items[ITEM_CLOCK]==clocks);invalidated++;
     }
     int n=snprintf(out,capacity,
-        "{\"snapshots\":%u,\"invalidations\":%u,\"failed_action_preserved\":%s,\"queue_cleared\":%s,\"no_auto_strike\":%s,\"break_fx_cleared\":%s,\"shape_synced\":%s,\"same_tab_preserved\":%s,\"bag_clock\":%s,\"entry_sound_cleared\":%s,\"entry_state_restored\":%s,\"frenzy_state_restored\":%s,\"frenzy_view_synced\":%s,\"clone_retracted\":%s,\"backlog_restored\":%s}",
+        "{\"snapshots\":%u,\"invalidations\":%u,\"failed_action_preserved\":%s,\"queue_cleared\":%s,\"no_auto_strike\":%s,\"break_fx_cleared\":%s,\"shape_synced\":%s,\"same_tab_preserved\":%s,\"bag_clock\":%s,\"entry_sound_cleared\":%s,\"entry_state_restored\":%s,\"frenzy_state_restored\":%s,\"frenzy_view_synced\":%s,\"clone_retracted\":%s,\"backlog_restored\":%s,\"bag_roundtrip_after_shatter\":%s,\"rapid_taps_after_shatter\":%s}",
         restored,invalidated,failed_no_cancel?"true":"false",queue_cleared?"true":"false",no_auto?"true":"false",
         break_clear?"true":"false",shape_clear?"true":"false",same_tab?"true":"false",bag?"true":"false",
-        entry_clear?"true":"false",entry_restore?"true":"false",frenzy_restore?"true":"false",frenzy_view?"true":"false",twins?"true":"false",backlog?"true":"false");
+        entry_clear?"true":"false",entry_restore?"true":"false",frenzy_restore?"true":"false",frenzy_view?"true":"false",twins?"true":"false",backlog?"true":"false",bag_return?"true":"false",rapid_break?"true":"false");
     fresh(g);return n;
 }

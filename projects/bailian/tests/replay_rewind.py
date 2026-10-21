@@ -44,6 +44,8 @@ with tempfile.TemporaryDirectory(prefix="forge-rewind-") as scratch:
         output = ctypes.create_string_buffer(4096)
         assert 0 < api.rewind_test_report(output, len(output)) < len(output)
         checks = json.loads(output.value)
+        snapshot = runtime.metadata()
+        checks["rewind_diagnostics"] = snapshot.get("clocks") == 2 and snapshot.get("can_rewind") is False
         failed = [name for name, value in checks.items() if value is False]
         result = {"status": "FAIL" if failed else "PASS", "checks": checks, "failed": failed}
         (ART / ("baseline.json" if args.audit else "result.json")).write_text(json.dumps(result, indent=2) + "\n")
