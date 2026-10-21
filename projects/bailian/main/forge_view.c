@@ -193,22 +193,33 @@ static void header(game_handle_t g)
 }
 static void navigation(game_handle_t g)
 {
-    static const char *const labels[4]={"锻造","剑架","遗物","贡台"};
-    for(unsigned i=0;i<4;i++){int x=(int)i*120;
-        bool active=g->screen==i||(i==2&&(g->screen==SCREEN_MERCHANT||g->screen==SCREEN_ITEMS));
-        frame(x+2,416,116,62,active);
-        forge_text_center(g,labels[i],x+2,441,116,23,active?FORGE_GOLD:FORGE_CREAM);
-        if(i==0){DrawRectangle(x+50,426,19,6,FORGE_GOLD);
-            DrawLine(x+58,431,x+58,439,FORGE_GOLD);
+    static const char *const labels[5]={"锻造","剑架","道具","遗物","贡台"};
+    static const uint8_t screens[]={SCREEN_FORGE,SCREEN_RACK,SCREEN_ITEMS,SCREEN_RELICS,SCREEN_TRIBUTE};
+    for(unsigned i=0;i<5;i++){int x=(int)i*96;
+        bool active=g->screen==screens[i]||(screens[i]==SCREEN_RELICS&&g->screen==SCREEN_MERCHANT);
+        const char *label=labels[i];
+        if(screens[i]==SCREEN_ITEMS){
+            unsigned count=0;for(unsigned item=0;item<ITEM_STORED_COUNT;item++)count+=g->state.items[item];
+            snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"道具 %u"),count);
+            label=g->text_buffer;
+        }
+        frame(x+2,416,92,62,active);
+        int size=fit_size(g,forge_tr(g,label),84,screens[i]==SCREEN_ITEMS?19:23);
+        forge_text_center(g,label,x+2,441,92,size,active?FORGE_GOLD:FORGE_CREAM);
+        if(screens[i]==SCREEN_FORGE){DrawRectangle(x+38,426,19,6,FORGE_GOLD);
+            DrawLine(x+46,431,x+46,439,FORGE_GOLD);
             }
-        if(i==1){DrawLine(x+50,425,x+65,438,FORGE_GOLD);
-            DrawLine(x+65,425,x+50,438,FORGE_GOLD);
+        if(screens[i]==SCREEN_RACK){DrawLine(x+38,425,x+53,438,FORGE_GOLD);
+            DrawLine(x+53,425,x+38,438,FORGE_GOLD);
             }
-        if(i==2){DrawCircle(x+59,431,6,FORGE_GOLD);
-            DrawCircle(x+59,431,3,(Color){46,33,22,255});
+        if(screens[i]==SCREEN_ITEMS){DrawRectangleLines(x+38,427,18,12,FORGE_GOLD);
+            DrawLine(x+42,427,x+44,423,FORGE_GOLD);DrawLine(x+44,423,x+51,423,FORGE_GOLD);DrawLine(x+51,423,x+53,427,FORGE_GOLD);
             }
-        if(i==3){DrawRectangleLines(x+51,425,17,14,FORGE_GOLD);
-            DrawLine(x+49,438,x+70,438,FORGE_GOLD);
+        if(screens[i]==SCREEN_RELICS){DrawCircle(x+47,431,6,FORGE_GOLD);
+            DrawCircle(x+47,431,3,(Color){46,33,22,255});
+            }
+        if(screens[i]==SCREEN_TRIBUTE){DrawRectangleLines(x+39,425,17,14,FORGE_GOLD);
+            DrawLine(x+37,438,x+58,438,FORGE_GOLD);
             }
     }
 }
@@ -422,15 +433,17 @@ static void merchant(game_handle_t g)
 static void items(game_handle_t g)
 {
     page_title(g,"铁砧旁的消耗品");
-    forge_text_fit(g,"点击查看效果与使用条件",32,85,424,16,FORGE_MUTED);
-    for(unsigned i=0;i<5;i++){int y=104+(int)i*60;
+    forge_text_fit(g,"购买后先存包，选择道具再确认使用",32,85,424,16,FORGE_MUTED);
+    for(unsigned i=0;i<ITEM_STORED_COUNT;i++){int y=104+(int)i*60;
         frame(12,y,456,55,false);
         char key[20];
         snprintf(key,sizeof(key),"relic_%u",item_icons[i]);
         sprite(g->relic_atlas,key,24,y+3,48,48,WHITE);
-        forge_text_fit(g,forge_item_names[i],93,y+7,203,22,FORGE_GOLD);
+        forge_text_fit(g,forge_item_names[i],93,y+5,240,21,g->state.items[i]?FORGE_GOLD:FORGE_MUTED);
+        const char *reason=forge_item_block_reason(g,(int)i);
         bool armed=i==ITEM_SCALE?g->state.scale:i==ITEM_CHALK?g->state.chalk:i==ITEM_POWDER?g->state.powder:false;
-        if(armed)forge_text(g,"已准备",309,y+12,14,FORGE_GOLD);
+        const char *status=armed?"已准备":!g->state.items[i]?"暂无库存":reason?"查看使用条件":"可选择使用";
+        forge_text_fit(g,status,93,y+32,358,14,armed||!reason?FORGE_GOLD:FORGE_MUTED);
         snprintf(g->text_buffer,sizeof(g->text_buffer),"× %u",g->state.items[i]);
         forge_text(g,g->text_buffer,366,y+10,22,FORGE_CREAM);
         }
@@ -490,11 +503,31 @@ static void modal(game_handle_t g)
             title=offer->kind<2?forge_family_names[offer->family]:forge_item_names[offer->id];
             effect=offer->kind<2?forge_family_effects[offer->family]:forge_item_effects[offer->id];
         }
-        forge_text_fit(g,title,54,128,370,25,FORGE_GOLD);wrap(g,effect,54,200,370,19,4,FORGE_CREAM);
+        forge_text_fit(g,title,54,128,370,25,FORGE_GOLD);wrap(g,effect,54,197,370,18,3,FORGE_CREAM);
         if(g->modal==MODAL_OFFER){forge_money_t price=forge_merchant_price(&g->state,g->detail_offer);forge_text(g,"金币",54,167,18,FORGE_MUTED);amount(g,&price,115,166,20,FORGE_GOLD);}
         else{snprintf(g->text_buffer,sizeof(g->text_buffer),forge_tr(g,"持有 %u 份"),g->state.items[g->detail_item]);forge_text(g,g->text_buffer,54,168,18,FORGE_MUTED);}
-        button(g,48,320,178,43,"返回",false);button(g,254,320,178,43,g->modal==MODAL_ITEM?"使用1份":"确认购买",true);
-        if(g->notice_ms)wrap(g,g->notice,22,384,436,16,1,FORGE_MUTED);
+        const char *action="确认购买",*status=NULL;
+        bool available=true;
+        if(g->modal==MODAL_ITEM){
+            status=forge_item_block_reason(g,g->detail_item);
+            available=status==NULL;
+            action=available?"使用1份":"暂不可用";
+            if(!status)status="确认后才会消耗1份";
+        }else{
+            const forge_offer_t *offer=&g->state.merchant[g->detail_offer];
+            if(offer->kind==2){
+                bool stored=offer->id<ITEM_STORED_COUNT;
+                action=stored?"购买存入背包":"购买并生效";
+                status=stored?"购买不会自动使用，可在道具背包中择时使用":"此商品购买后立即生效";
+            }
+            forge_money_t price=forge_merchant_price(&g->state,g->detail_offer);
+            if(!offer->stock){action="已售罄";available=false;}
+            else if(forge_money_compare(&g->state.coins,&price)<0){action=status="金币不足";available=false;}
+        }
+        if(status)wrap(g,status,54,276,370,14,2,available?FORGE_GOLD:FORGE_MUTED);
+        button(g,48,320,178,43,"返回",false);button(g,254,320,178,43,action,available);
+        if(g->notice_ms&&(!status||strcmp(g->notice,forge_tr(g,status))))
+            forge_text_fit(g,g->notice,48,365,384,12,FORGE_MUTED);
         return;
     }
     if(g->modal==MODAL_RELIC){int id=g->detail_relic;

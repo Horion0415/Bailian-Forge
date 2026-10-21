@@ -15,7 +15,8 @@ enum { PHASE_GIFT,PHASE_PLAY,PHASE_CLEAR,PHASE_LOST };
 enum { SCREEN_FORGE,SCREEN_RACK,SCREEN_RELICS,SCREEN_TRIBUTE,SCREEN_MERCHANT,SCREEN_ITEMS,SCREEN_BOOK,SCREEN_PAUSE };
 enum { RESULT_BREAK,RESULT_DAMAGE,RESULT_HOLD,RESULT_SUCCESS,RESULT_GREAT,RESULT_NONE,RESULT_REFINE };
 enum { PLACE_FREE,PLACE_RACK,PLACE_ANVIL,PLACE_TRIBUTE };
-enum { ITEM_SCALE,ITEM_CLOCK,ITEM_CHALK,ITEM_POWDER,ITEM_STAR,ITEM_INCENSE,ITEM_DELIVERY,ITEM_COUNT };
+enum { ITEM_SCALE,ITEM_CLOCK,ITEM_CHALK,ITEM_POWDER,ITEM_STAR,ITEM_INCENSE,ITEM_DELIVERY,ITEM_COUNT,
+       ITEM_STORED_COUNT=ITEM_INCENSE };
 enum { MODAL_NONE,MODAL_SHORT,MODAL_NEW,MODAL_RELIC,MODAL_FAMILY,MODAL_TRADE,MODAL_DISCARD,MODAL_ITEM,MODAL_OFFER };
 enum { FORGE_ENERGY_UNIT=32,FORGE_ENERGY_COST=640*FORGE_ENERGY_UNIT,FORGE_ENERGY_MAX=2*FORGE_ENERGY_COST };
 enum { FB_NONE,FB_HIT,FB_GREAT,FB_DAMAGE,FB_BREAK,FB_BELL,FB_SELECT,FB_HEAT,FB_FRENZY };
@@ -104,6 +105,8 @@ bool forge_reroll(game_handle_t g);
 forge_money_t forge_reroll_price(const forge_state_t *s);
 forge_money_t forge_merchant_price(const forge_state_t *s,unsigned slot);
 bool forge_buy_merchant(game_handle_t g,unsigned slot);
+/* NULL means usable now. Reading a reason never consumes an item or an undo. */
+const char *forge_item_block_reason(game_handle_t g,int item);
 bool forge_use_item(game_handle_t g,int item);
 bool forge_can_rewind(game_handle_t g);
 bool forge_rewind(game_handle_t g);

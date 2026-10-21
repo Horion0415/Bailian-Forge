@@ -455,21 +455,37 @@ bool forge_buy_merchant(game_handle_t g,unsigned slot){
     else if(o->id==ITEM_DELIVERY)s->extra_supply+=2;
     else s->items[o->id]++;
     forge_changed(g,true);
-    forge_notice(g,"购买成功，物品已放入背包或剑架");
+    if(o->kind<2)forge_notice(g,"购买成功，新剑已放入剑架");
+    else if(o->id==ITEM_INCENSE)forge_notice(g,"遗忘香已生效，怒气降低1点");
+    else if(o->id==ITEM_DELIVERY)forge_notice(g,"送货单已生效，次日额外供剑2把");
+    else forge_notice(g,"购买成功，道具已存入背包，可择时使用");
     g->feedback=FB_SELECT;
     return true;
 }
-bool forge_use_item(game_handle_t g,int item){
+const char *forge_item_block_reason(game_handle_t g,int item){
+    if(!g||item<0||item>=ITEM_COUNT)return "没有此物品";
+    if(item>=ITEM_STORED_COUNT)return "此商品购买后立即生效";
     forge_state_t *s=&g->state;
-    if(item==ITEM_CLOCK)return forge_rewind(g);
+    if(s->phase!=PHASE_PLAY||g->tribute.active)return "当前不能使用此物品";
+    if(item==ITEM_CLOCK){
+        if(!s->items[item])return "背包中没有悔恨发条";
+        return forge_can_rewind(g)?NULL:"没有可回溯的上一锤；换剑或离开铁砧后失效";
+    }
+    if(!s->items[item])return "背包中没有此物品";
     forge_blade_t *b=forge_active(g);
-    if(!b||item<0||item>=ITEM_COUNT||!s->items[item]){forge_notice(g,"先选择一把剑，并确认背包中有此物品");
-        return false;
-        }
-    if((b->frenzy_ms>0||b->charge>=10)&&(item==ITEM_SCALE||item==ITEM_POWDER||item==ITEM_STAR)){forge_notice(g,"入神或充能已满时不能使用此物品");
-        return false;
-        }
-    if((item==ITEM_SCALE&&s->scale)||(item==ITEM_CHALK&&s->chalk)||(item==ITEM_POWDER&&s->powder))return false;
+    if(!b)return "先在剑架选择一把剑";
+    if((b->frenzy_ms>0||b->charge>=10)&&(item==ITEM_SCALE||item==ITEM_POWDER||item==ITEM_STAR))
+        return "入神或充能已满时不能使用此物品";
+    if((item==ITEM_SCALE&&s->scale)||(item==ITEM_CHALK&&s->chalk)||(item==ITEM_POWDER&&s->powder))
+        return "此道具已准备，完成强化后再用";
+    return NULL;
+}
+bool forge_use_item(game_handle_t g,int item){
+    const char *blocked=forge_item_block_reason(g,item);
+    if(blocked){if(g)forge_notice(g,blocked);return false;}
+    if(item==ITEM_CLOCK)return forge_rewind(g);
+    forge_state_t *s=&g->state;
+    forge_blade_t *b=forge_active(g);
     if(item==ITEM_STAR)b->charge=(uint8_t)(b->charge+3>10?10:b->charge+3);
     else if(item==ITEM_SCALE)s->scale=true;
     else if(item==ITEM_CHALK)s->chalk=true;

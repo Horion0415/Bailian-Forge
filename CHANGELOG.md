@@ -1,6 +1,14 @@
 # Changelog
 
-## Unreleased — 0.3.4 Iris 0.2 candidate
+## Unreleased — 0.3.5 item selection candidate
+
+- Add an explicit item tab with live quantity; preserve shatter undo when opening and returning from it.
+- Distinguish stored consumables from purchases that apply immediately.
+- Show use requirements, armed state and empty inventory before confirmation; cancellation never consumes an item.
+- Cover all seven merchant items and the actual purchase/bag/use touch flow.
+- Keep previously selected frenzy balancing while the original-rule preference is being clarified.
+
+## 0.3.4 Iris 0.2 candidate (not released)
 
 - Pin matching ESP-Iris/Mosaico tools 0.2 and rebuild the application for wire protocol 2 and Recovery ABI 2.
 - Generate the new System Update schema and use the required `vibe_mode/test` and `main_app/ota_0` partition contract.

@@ -126,14 +126,18 @@ void forge_pointer(game_handle_t g,int x,int y)
             }
         return;
         }
-    if(y>=414){unsigned tab=(unsigned)x/120;
+    if(y>=414){
+        static const uint8_t tabs[]={SCREEN_FORGE,SCREEN_RACK,SCREEN_ITEMS,SCREEN_RELICS,SCREEN_TRIBUTE};
+        unsigned index=(unsigned)x/96;
+        if(index>=sizeof(tabs)/sizeof(tabs[0]))return;
+        unsigned tab=tabs[index];
         if(tab==g->screen)return;
         bool bag_return=g->screen==SCREEN_ITEMS&&tab==SCREEN_FORGE;
         forge_swing_cancel(g,tab!=g->screen);
         g->screen=(uint8_t)tab;
         g->page=0;
         g->selected=255;
-        if(!bag_return)g->undo_valid=false;
+        if(!bag_return&&tab!=SCREEN_ITEMS)g->undo_valid=false;
         return;
         }
     if(y<52){if(x<90){game_set_paused(g,true);
@@ -208,7 +212,7 @@ void forge_pointer(game_handle_t g,int x,int y)
             return;
             }
         if(y>=130&&y<370){unsigned index=g->page*4+(unsigned)(y-130)/60;
-            if(index<s->merchant_count){g->detail_offer=(uint8_t)index;g->modal=MODAL_OFFER;}
+            if(index<s->merchant_count){g->detail_offer=(uint8_t)index;g->notice_ms=0;g->modal=MODAL_OFFER;}
             }
         if(y>=375){g->screen=SCREEN_RELICS;
             g->page=0;
@@ -216,7 +220,7 @@ void forge_pointer(game_handle_t g,int x,int y)
         return;
     }
     if(g->screen==SCREEN_ITEMS){if(y>=104&&y<404){unsigned item=(unsigned)(y-104)/60;
-            if(item<5){g->detail_item=(uint8_t)item;g->modal=MODAL_ITEM;}
+            if(item<ITEM_STORED_COUNT){g->detail_item=(uint8_t)item;g->notice_ms=0;g->modal=MODAL_ITEM;}
             }return;
         }
     if(g->screen==SCREEN_BOOK){
