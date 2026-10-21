@@ -63,7 +63,7 @@ and the [official installation guide](https://github.com/esp-mosaico/esp-mosaico
 First installation uses retained Vibe Mode/System Update. `app-update` is suitable
 only when the complete partition table and resources match; use the product CLI.
 
-Version 0.3.2 passed `app-update`, firmware validation and startup checks, with saved
+Version 0.3.3 passed `app-update`, firmware validation and startup checks, with saved
 progress and mute restored. An earlier System Update restarted Vibe Mode 0.1.4
 during transfer; the cause is unresolved.
 Installation through mosaico.ai has not been validated. Browser save data is

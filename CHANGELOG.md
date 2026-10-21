@@ -6,6 +6,7 @@
 - Keep extra taps on a shattered blade at the anvil when a clock can restore it.
 - Show clock quantity, highlight an available rewind and clarify missing-item/snapshot notices.
 - Cover both shatter touch paths and preserve invalidation after actual gameplay changes.
+- Verify 0.3.3 application update, running firmware identity, startup and save/preferences restoration on ESP-Mosaico.
 
 ## 0.3.2
 
