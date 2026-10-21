@@ -5,7 +5,9 @@
 面向 ESP-Mosaico 的触摸锻刀游戏：加热、落锤、收手进贡，在碎刀风险中打造名剑，
 搭配遗物与道具，挑战 21 日贡额。支持简体中文与英文即时切换。
 
-![ESP-Mosaico 实机画面](projects/bailian/publish/cover.png)
+![共享 C 渲染器原生回放画面](projects/bailian/publish/cover.png)
+
+截图来自共享 C 渲染器的原生回放场景，不代表 0.3.5 候选版本已完成实机验收。
 
 - 10 个剑系、50 种实体形态，强化最高 +99。
 - 94 件经典遗物、7 种商人消耗品，通关后可延长契约。
@@ -61,7 +63,7 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 
 保留整个仓库目录结构。仓库包含依赖版本、组件锁文件和必需的引擎补丁。
 详细信息见[应用说明](projects/bailian/README.md)及[固定版本集成指南](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/mosaico-tools/docs/application-integration.md)。
-0.3.5 是尚未发布的 **ESP-Iris / Vibe Mode 0.2 候选版本**，使用设备协议 2、
+0.3.5 是 **ESP-Iris / Vibe Mode 0.2 候选版本**，使用设备协议 2、
 Recovery ABI 2 和 `esp-iris-system-update/0.2` 固件包。旧 0.1 应用或基础固件需先按
 [官方 0.2 迁移指南](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/esp-mosaico-vibe-mode/docs/migration-0.2.md)
 迁移，再通过 System Update 安装新的分区契约；仅在完整分区表和资源匹配后才能

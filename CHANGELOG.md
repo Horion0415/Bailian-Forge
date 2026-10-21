@@ -6,14 +6,15 @@
 - Distinguish stored consumables from purchases that apply immediately.
 - Show use requirements, armed state and empty inventory before confirmation; cancellation never consumes an item.
 - Cover all seven merchant items and the actual purchase/bag/use touch flow.
-- Keep previously selected frenzy balancing while the original-rule preference is being clarified.
+- Retain fast refining and the 640 ms full-upgrade energy cycle during frenzy.
+- Pass offline build, package, item-flow, language, rewind and audio checks; hardware installation remains unverified.
 
 ## 0.3.4 Iris 0.2 candidate (not released)
 
 - Pin matching ESP-Iris/Mosaico tools 0.2 and rebuild the application for wire protocol 2 and Recovery ABI 2.
 - Generate the new System Update schema and use the required `vibe_mode/test` and `main_app/ota_0` partition contract.
 - Preserve the gameplay save format and its `forge_save` partition address and capacity.
-- Require hardware acceptance before upload; this candidate has not been published or tested on a device.
+- Complete offline package validation; hardware installation remains unverified.
 
 ## 0.3.3
 

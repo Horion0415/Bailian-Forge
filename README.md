@@ -5,7 +5,10 @@
 A touch-controlled sword-forging game for ESP-Mosaico. Forge evolving blades,
 collect relics, and survive 21 days of tribute. Switch between Simplified Chinese and English from the top bar or pause menu.
 
-![ESP-Mosaico gameplay](projects/bailian/publish/cover.png)
+![Native simulator gameplay](projects/bailian/publish/cover.png)
+
+Screenshots use the shared C renderer in native replay scenarios. They do not
+establish hardware acceptance of the 0.3.5 candidate.
 
 - Heat, hammer, protect and offer blades, risking damage or shattering.
 - 10 sword families, 50 illustrated forms and upgrades up to +99.
@@ -69,7 +72,7 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 Keep the complete repository layout. Dependency versions, registry lockfile and
 the required engine patch are included. See [application notes](projects/bailian/README.md)
 and the [pinned application integration guide](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/mosaico-tools/docs/application-integration.md).
-Version 0.3.5 is an unpublished candidate for **ESP-Iris / Vibe Mode 0.2**. It
+Version 0.3.5 is a candidate for **ESP-Iris / Vibe Mode 0.2**. It
 uses wire protocol 2, Recovery ABI 2 and the `esp-iris-system-update/0.2` bundle
 format. An old 0.1 application or base installation must follow the
 [official 0.2 migration guide](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/esp-mosaico-vibe-mode/docs/migration-0.2.md)

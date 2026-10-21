@@ -2,8 +2,9 @@
 
 This isolated 0.3.5 candidate includes the 0.3.4 fix for the platform's rejection of the 0.3.3
 `esp-iris-system-update/v1` archive. It uses the matching official utils revision
-`c6b43a6be7fb8aba832fc4016d4076702f5414ae` and must pass device acceptance before
-upload. Changing the old archive's schema string does not migrate an application.
+`c6b43a6be7fb8aba832fc4016d4076702f5414ae`. This candidate has offline validation;
+its platform entry must disclose that device acceptance is incomplete.
+Changing the old archive's schema string does not migrate an application.
 
 The ESP-IDF revision, BSP, patched engine, rule data and save payload stay
 pinned. The item selection UI is clearer; stored consumables still require manual
@@ -30,4 +31,5 @@ No hardware is currently available. Device identity, migration, normal and
 maintenance startup, touch/display/audio, independent USB transfer, saved-game
 and preference restoration, and website installation remain unverified.
 Host builds and package checks are recorded separately and are not hardware
-acceptance. The original 0.3.3 source, artifacts and simulator are retained.
+acceptance. The 0.3.3 source remains in Git history, and its release artifacts
+are retained separately.
