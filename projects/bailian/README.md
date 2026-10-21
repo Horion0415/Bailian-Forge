@@ -93,8 +93,14 @@ in progress intact. Gameplay save size remains unchanged.
 
 After a shatter, extra anvil taps stay on Forge while a clock can restore the
 blade. The button shows the remaining count and highlights a valid opportunity;
-the empty anvil points to it. Device/Host JSON includes clocks and can_rewind.
+the empty anvil points to it. The visible Items tab and the top-right shortcut
+both preserve this opportunity; returning to Forge also preserves it.
+Device/Host JSON includes clocks and can_rewind.
 
 `tests/replay_rewind.py` covers all five results, +99, shatter side effects,
 clone/backlog rollback, item-bag roundtrips after shattering, repeated empty-anvil
 taps, invalidation and controller/visual cleanup.
+
+`tests/replay_items.py` checks buying and storing, cancellation, manual use,
+instant purchases, all five navigation tabs and shatter undo through the Items
+tab. Item eligibility is read-only and shared by the model and detail UI.

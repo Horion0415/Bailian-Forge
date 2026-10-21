@@ -42,6 +42,13 @@ python3 mosaico.py game sim --project projects/bailian --port 8476
 
 ![英文界面原生回放示例](projects/bailian/publish/english.png)
 
+## 道具使用
+
+底部“道具”显示背包中的消耗品总数。龙鳞、发条、粉笔、火药和寒星买入后先存包，
+不会自动使用；选择道具、查看当前使用条件，再确认消耗一份，返回或取消不会扣库存。
+碎刀后只要仍保留上一锤记录，发条也可从此入口使用。
+遗忘香在购买时降低怒气，送货单在购买时预约次日额外供剑，确认按钮会明确提示立即生效。
+
 ## 编译与安装
 
 目标为 **ESP-Mosaico / ESP32-S31，480×480 触摸屏**。ESP-IDF 必须固定为
@@ -54,7 +61,7 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 
 保留整个仓库目录结构。仓库包含依赖版本、组件锁文件和必需的引擎补丁。
 详细信息见[应用说明](projects/bailian/README.md)及[固定版本集成指南](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/mosaico-tools/docs/application-integration.md)。
-0.3.4 是尚未发布的 **ESP-Iris / Vibe Mode 0.2 候选版本**，使用设备协议 2、
+0.3.5 是尚未发布的 **ESP-Iris / Vibe Mode 0.2 候选版本**，使用设备协议 2、
 Recovery ABI 2 和 `esp-iris-system-update/0.2` 固件包。旧 0.1 应用或基础固件需先按
 [官方 0.2 迁移指南](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/esp-mosaico-vibe-mode/docs/migration-0.2.md)
 迁移，再通过 System Update 安装新的分区契约；仅在完整分区表和资源匹配后才能
@@ -73,6 +80,7 @@ python3 projects/bailian/tests/replay_gameplay.py
 python3 projects/bailian/tests/replay_audio.py
 python3 projects/bailian/tests/replay_i18n.py
 python3 projects/bailian/tests/replay_rewind.py
+python3 projects/bailian/tests/replay_items.py
 ```
 
 测试直接执行共享原生 C 模型与渲染器。构建目录、测试输出、凭据和设备诊断记录不进入 Git。

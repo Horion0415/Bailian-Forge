@@ -1,12 +1,14 @@
 # Iris 0.2 candidate
 
-This isolated 0.3.4 candidate fixes the platform's rejection of the 0.3.3
+This isolated 0.3.5 candidate includes the 0.3.4 fix for the platform's rejection of the 0.3.3
 `esp-iris-system-update/v1` archive. It uses the matching official utils revision
 `c6b43a6be7fb8aba832fc4016d4076702f5414ae` and must pass device acceptance before
 upload. Changing the old archive's schema string does not migrate an application.
 
-The ESP-IDF revision, BSP, patched engine, gameplay, assets and save payload stay
-pinned. The application is rebuilt from a fresh build directory with the Iris
+The ESP-IDF revision, BSP, patched engine, rule data and save payload stay
+pinned. The item selection UI is clearer; stored consumables still require manual
+use, while incense and delivery remain instant purchases. The application was
+rebuilt from a fresh build directory with the Iris
 0.2 component and application recovery integration. It uses two USB CDC
 interfaces, wire version 2, Recovery ABI 2 and the test-partition boot contract.
 

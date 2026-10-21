@@ -47,6 +47,15 @@ and save loading keep it. Browser preferences last for the simulator process.
 
 ![English UI in the native replay test scenario](projects/bailian/publish/english.png)
 
+## Items
+
+The bottom **Items** tab shows how many stored consumables you own. Buying a
+scale, clock, chalk, powder pouch or star shard stores it without activating it.
+Choose an item, read its current requirements, then confirm one use; Back cancels
+without consuming stock. A valid clock can restore a shattered blade from this tab.
+Incense reduces anger on purchase and the delivery slip adds two blades to the
+next supply. Their purchase dialogs explicitly say that they apply immediately.
+
 ## Build and install
 
 Target: **ESP-Mosaico / ESP32-S31, 480×480 touch display**. Use ESP-IDF at exactly
@@ -60,7 +69,7 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 Keep the complete repository layout. Dependency versions, registry lockfile and
 the required engine patch are included. See [application notes](projects/bailian/README.md)
 and the [pinned application integration guide](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/mosaico-tools/docs/application-integration.md).
-Version 0.3.4 is an unpublished candidate for **ESP-Iris / Vibe Mode 0.2**. It
+Version 0.3.5 is an unpublished candidate for **ESP-Iris / Vibe Mode 0.2**. It
 uses wire protocol 2, Recovery ABI 2 and the `esp-iris-system-update/0.2` bundle
 format. An old 0.1 application or base installation must follow the
 [official 0.2 migration guide](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/esp-mosaico-vibe-mode/docs/migration-0.2.md)
@@ -82,6 +91,7 @@ python3 projects/bailian/tests/replay_gameplay.py
 python3 projects/bailian/tests/replay_audio.py
 python3 projects/bailian/tests/replay_i18n.py
 python3 projects/bailian/tests/replay_rewind.py
+python3 projects/bailian/tests/replay_items.py
 ```
 
 Tests execute the shared native C model and renderer. Build/test output,
