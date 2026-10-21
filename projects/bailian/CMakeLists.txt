@@ -8,11 +8,16 @@ endif()
 if(NOT SDKCONFIG_DEFAULTS)
     set(SDKCONFIG_DEFAULTS "sdkconfig.defaults;sdkconfig.application.defaults")
 endif()
-include("${MOSAICO_UTILS_ROOT}/mosaico-tools/cmake/raylib_lite_engine.cmake")
+# Keep the pinned engine's multi-component integration while moving the
+# application recovery and wire protocol to the matched Iris 0.2 toolchain.
+set(MOSAICO_GAME_GSPC_FETCHER "${MOSAICO_UTILS_ROOT}/mosaico-tools/tools/gsp-sim/fetch_gspc.py")
+set(MOSAICO_GAME_RECOVERY_COMPONENT_DIR
+    "${MOSAICO_UTILS_ROOT}/esp-mosaico-vibe-mode/components/esp_mosaico_app_recovery")
+include("${RAYLIB_LITE_ENGINE_ROOT}/cmake/mosaico_game_sdk.cmake")
 mosaico_game_sdk_configure_gsp_compiler()
 mosaico_game_sdk_add_components(RAYLIB AUDIO)
-include("${MOSAICO_UTILS_ROOT}/esp-mosaico-recovery/cmake/mosaico_idf_project.cmake")
-project(bailian VERSION 0.3.3)
+include("${MOSAICO_UTILS_ROOT}/esp-mosaico-vibe-mode/cmake/mosaico_idf_project.cmake")
+project(bailian VERSION 0.3.4)
 # The pinned S31 GCC 16.1 crashes in SLP across both game and SDK sources
 # (lwIP and DMA included). Keep other -O2 passes and other toolchains intact.
 if(IDF_TARGET STREQUAL "esp32s31" AND CMAKE_C_COMPILER_ID STREQUAL "GNU" AND

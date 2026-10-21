@@ -53,13 +53,15 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 ```
 
 保留整个仓库目录结构。仓库包含依赖版本、组件锁文件和必需的引擎补丁。
-详细信息见[应用说明](projects/bailian/README.md)及[官方安装指南](https://github.com/esp-mosaico/esp-mosaico-vibe/blob/v26.0.2/docs/mosaico-cli_CN.md)。
-首次安装通过保留的 Vibe Mode 执行 System Update；完整分区表和资源一致的应用更新
-才适用 `app-update`，请通过产品 CLI 操作。
+详细信息见[应用说明](projects/bailian/README.md)及[固定版本集成指南](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/mosaico-tools/docs/application-integration.md)。
+0.3.4 是尚未发布的 **ESP-Iris / Vibe Mode 0.2 候选版本**，使用设备协议 2、
+Recovery ABI 2 和 `esp-iris-system-update/0.2` 固件包。旧 0.1 应用或基础固件需先按
+[官方 0.2 迁移指南](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/esp-mosaico-vibe-mode/docs/migration-0.2.md)
+迁移，再通过 System Update 安装新的分区契约；仅在完整分区表和资源匹配后才能
+使用 `app-update`，设备操作均通过产品 CLI。
 
-0.3.3 已通过 `app-update` 安装、固件校验及启动检查，并确认存档和静音设置恢复。
-较早的一次 System Update 在传输阶段触发 Vibe Mode 0.1.4 重启，原因尚未确认；
-mosaico.ai 网页下载安装仍待验证。
+目前没有测试设备，本候选的实机迁移、启动、存档恢复及 mosaico.ai 安装均未验收。
+此前 0.3.3 的实机结果只适用于独立保留的 0.1 构建，见[候选说明](projects/bailian/IRIS_02_CANDIDATE.md)。
 浏览器与设备存档独立，浏览器的游戏静音选项在当前模拟器进程内保留。
 
 ## 验证

@@ -2,15 +2,24 @@
   "workspace": {
     "url": "https://github.com/esp-mosaico/esp-mosaico-vibe.git",
     "tag": "v26.0.2",
-    "commit": "dd63f3a742686d90046dd4eb003a4f8eb1ad05f1"
+    "commit": "dd63f3a742686d90046dd4eb003a4f8eb1ad05f1",
+    "note": "Base scaffold; current runtime and submodule pins are declared below."
   },
   "esp_idf": {
     "commit": "7b9cc1ac79f865983f59bb8ff3ff43eb74ff1dbe",
     "target": "esp32s31"
   },
+  "runtime": {
+    "esp_iris": "0.2.0",
+    "minimum_vibe_mode": "0.2.0",
+    "wire_version": 2,
+    "recovery_abi": 2,
+    "product_contract": "esp-mosaico/v2",
+    "bundle_schema": "esp-iris-system-update/0.2"
+  },
   "submodules": {
     "esp-mosaico-bsp": "a2c985ad698b3f04a21c63e006b43e7e948bc1d7",
-    "esp-mosaico-utils": "fc63d43f3ac72aa54e701b07b07fbed07a16b3ca",
+    "esp-mosaico-utils": "c6b43a6be7fb8aba832fc4016d4076702f5414ae",
     "raylib-lite-engine": "ca3200a6b7f63e2bdea07851e19fdbd3a42eb742"
   },
   "local_patches": {
@@ -31,7 +40,7 @@
   },
   "application": {
     "name": "bailian",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "save_payload_bytes": 24032,
     "legacy_save_payload_bytes": 23544
   }

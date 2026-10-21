@@ -59,14 +59,18 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 
 Keep the complete repository layout. Dependency versions, registry lockfile and
 the required engine patch are included. See [application notes](projects/bailian/README.md)
-and the [official installation guide](https://github.com/esp-mosaico/esp-mosaico-vibe/blob/v26.0.2/docs/mosaico-cli.md).
-First installation uses retained Vibe Mode/System Update. `app-update` is suitable
-only when the complete partition table and resources match; use the product CLI.
+and the [pinned application integration guide](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/mosaico-tools/docs/application-integration.md).
+Version 0.3.4 is an unpublished candidate for **ESP-Iris / Vibe Mode 0.2**. It
+uses wire protocol 2, Recovery ABI 2 and the `esp-iris-system-update/0.2` bundle
+format. An old 0.1 application or base installation must follow the
+[official 0.2 migration guide](https://github.com/esp-mosaico/esp-mosaico-utils/blob/c6b43a6be7fb8aba832fc4016d4076702f5414ae/esp-mosaico-vibe-mode/docs/migration-0.2.md)
+before installation. Use System Update for the changed partition contract;
+`app-update` applies only after the complete partition table and resources match.
 
-Version 0.3.3 passed `app-update`, firmware validation and startup checks, with saved
-progress and mute restored. An earlier System Update restarted Vibe Mode 0.1.4
-during transfer; the cause is unresolved.
-Installation through mosaico.ai has not been validated. Browser save data is
+Hardware migration, startup, save restoration and mosaico.ai installation of
+this candidate remain unverified because no test device is currently available.
+The earlier 0.3.3 hardware results apply to the separate 0.1 build. See the
+[candidate notes](projects/bailian/IRIS_02_CANDIDATE.md). Browser save data is
 separate from the device; its mute choice lasts for the simulator process.
 
 ## Verify

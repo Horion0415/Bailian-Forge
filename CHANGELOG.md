@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased — 0.3.4 Iris 0.2 candidate
+
+- Pin matching ESP-Iris/Mosaico tools 0.2 and rebuild the application for wire protocol 2 and Recovery ABI 2.
+- Generate the new System Update schema and use the required `vibe_mode/test` and `main_app/ota_0` partition contract.
+- Preserve the gameplay save format and its `forge_save` partition address and capacity.
+- Require hardware acceptance before upload; this candidate has not been published or tested on a device.
+
 ## 0.3.3
 
 - Preserve rewind after inspecting/cancelling an item and returning to Forge.
