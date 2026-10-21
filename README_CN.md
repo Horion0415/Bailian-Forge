@@ -57,8 +57,9 @@ python mosaico.py game build --project projects/bailian --idf-path /path/to/pinn
 首次安装通过保留的 Vibe Mode 执行 System Update；完整分区表和资源一致的应用更新
 才适用 `app-update`，请通过产品 CLI 操作。
 
-0.2.1 已通过 `app-update` 安装并验收。较早的一次 System Update 在传输阶段触发
-Vibe Mode 0.1.4 重启，原因尚未确认；mosaico.ai 网页下载安装仍待验证。
+0.3.2 已通过 `app-update` 安装、固件校验及启动检查，并确认存档和静音设置恢复。
+较早的一次 System Update 在传输阶段触发 Vibe Mode 0.1.4 重启，原因尚未确认；
+mosaico.ai 网页下载安装仍待验证。
 浏览器与设备存档独立，浏览器的游戏静音选项在当前模拟器进程内保留。
 
 ## 验证

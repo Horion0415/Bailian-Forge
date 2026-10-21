@@ -24,5 +24,7 @@ ImageGen 生成，音效由程序合成。
 [源码与运行说明](https://github.com/Horion0415/Bailian-Forge)
 · [素材与规则来源](https://github.com/Horion0415/Bailian-Forge/blob/main/projects/bailian/ASSETS.md)
 
-版本 0.3.2 重绘进贡巨龙的鳞甲、弯角与翼膜，新增呼吸、收贡点头及震怒反应；包含 0.3.1 的发条回溯修复与中英文切换。0.2.1 实机通过 app-update 验证，平台下载首次安装
-尚待验证；此前 Vibe Mode 0.1.4 的一次 System Update 传输中重启，原因尚未确认。
+版本 0.3.2 重绘进贡巨龙的鳞甲、弯角与翼膜，新增呼吸、收贡点头及震怒反应；包含发条回溯修复与中英文切换。
+
+0.3.2 已在 ESP-Mosaico 上通过应用更新、固件校验、启动和存档恢复检查，静音设置可正常保留。
+平台下载后的首次安装仍待验证；此前 Vibe Mode 0.1.4 的一次完整更新在传输中重启，原因尚未确认。

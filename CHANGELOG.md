@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2
+
+- Replace the tribute silhouette with a detailed transparent dragon sprite.
+- Add breathing, an acceptance nod, and an underpayment lunge with red eyes and embers.
+- Keep tribute settlement, timing, RNG and the gameplay save unchanged.
+- Verify application update, running firmware identity, startup and saved-game/mute restoration on ESP-Mosaico.
+
 ## 0.3.1
 
 - Clear buffered swings, stale impact/shatter effects and sword transitions after rewind.
